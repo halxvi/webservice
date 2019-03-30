@@ -1,0 +1,20 @@
+version:"3"
+services:
+
+  nginx:
+    build: ./nginx
+    image: nginx
+    container_name: nginx-homework
+    restart: always
+    ports:
+      - 8080:80
+    enviroment:
+      Nginx_Password: homework
+
+  php:
+    build: ./php
+    image: php
+    container_name: php-homework
+    restart: always
+    enviroment:
+      PHP_Password: homework

@@ -12,24 +12,27 @@ services:
       - php
 
   php:
-    build:  ./php
+    build: ./php
     volumes:
     - ./assets/html:/var/www/html
     depends_on: 
-    - mysql
+    - db
   
-  mysql:
+  db:
     image: mysql:5.7
     ports:
     - 13306:3306
     volumes:
     - ./mysql/data:/var/lib/mysql
     environment:
-      MYSQL_ROOT_PASSWORD: root         
+      MYSQL_ROOT_PASSWORD: root 
+    command: --innodb_use_native_aio=0   
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
     ports: 
     - 8888:80
     depends_on: 
-    - mysql
+    - db
+    environment:
+      PMA_HOST: db

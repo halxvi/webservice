@@ -25,17 +25,16 @@
 
                $stmt = $pdo->prepare('SELECT * FROM Users WHERE User_Name = ?');
                $stmt->execute(array($user_name));
-
                $password = $_POST["password"];
 
                     if($row = $stmt->fetch(PDO::FETCH_ASSOC)){
-                        if($password = $row["User_Password"]){
+                        if(password_verify($password, $row["User_Password"])){
                         session_regenerate_id(true);
                         $_SESSION["NAME"] = $row["User_name"];
                         header("Location: main.php");
                         exit();
                         }else{
-                            $errorMessage="えらー";
+                            $errorMessage="ぱすわーどえらー";
                         }
                     }
                     else{
@@ -47,6 +46,9 @@
             }
         }
         
+    }
+    if(isset($_POST["signup"])){
+        header("Location: signup.php");
     }
 ?>
 
@@ -61,7 +63,7 @@
         <p>ユーザー名</p><input type="text" id="user_name" name="user_name">
         <p>password</p><input type="password" id="password" name="password">
         <input type="submit" name="login" value="ログイン">
-        <input type="button" value="サインアップ">
+        <input type="submit" name="signup"value="サインアップ">
     </form>
     
 </body>

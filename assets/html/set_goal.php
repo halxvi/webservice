@@ -25,7 +25,7 @@
              elseif($_POST["term"] == "14"){
                 $Check_2w = "selected";
              }
-             elseif($_POST["term"] == "31"){
+             elseif($_POST["term"] == "30"){
                 $Check_1m = "selected";
              }
         }
@@ -39,11 +39,14 @@
 
     if(isset($_POST["send_data"])){
         try{
-            $Start_Date = date("Y-m-d H:i:s");
-
+            $Start_Date = date("Y-m-d");
+            $Alter_Term = (int)$_POST["term"];
+            $End_Date = time()+($Alter_Term*24*60*60);
+            $End_Date = date("Y-m-d",$End_Date);
+            echo $End_Date;
             $pdo = new PDO($dsn,$db['user'],$db['pass'],array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
-            $stmt = $pdo->prepare("INSERT INTO Tasks(Task_Id, Goal, Task,Way, Period, Start_Date) value(?,?,?,?,?,?)");
-            $stmt->execute(array($_SESSION["ID"],$_POST["object"],$_POST["quantitiy"],$_POST["way"],$_POST["term"],$Start_Date));
+            $stmt = $pdo->prepare("INSERT INTO Tasks(Task_Id, Goal, Task,Way, Period, Start_Date, End_Date) value(?,?,?,?,?,?,?)");
+            $stmt->execute(array($_SESSION["ID"],$_POST["object"],$_POST["quantitiy"],$_POST["way"],$_POST["term"],$Start_Date,$End_Date));
             $userMessage = "登録しました！";
             echo htmlspecialchars($userMessage,ENT_QUOTES);
 
@@ -52,7 +55,6 @@
             echo htmlspecialchars($errorMessage,ENT_QUOTES);
         }
     }
-    
 ?>
 
 <html>
@@ -66,7 +68,7 @@
         <select name="term">
         <option value="7" <?php echo $Check_1w?>>1週間</option>
         <option value="14" <?php echo $Check_2w?>>2週間</option>
-        <option value="31" <?php echo $Check_1m?>>1ヶ月</option>
+        <option value="30" <?php echo $Check_1m?>>1ヶ月</option>
         </select>
         <input type="text" name="quantitiy" <?php echo $quantitiy_html?>>
         <input type="text" name="way" <?php echo $way_html?>>

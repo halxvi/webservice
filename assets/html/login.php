@@ -17,7 +17,7 @@
             try{
                $pdo= new PDO($dsn,$db["user"], $db["pass"],array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
 
-               $stmt = $pdo->prepare('SELECT * FROM Users,Tasks WHERE User_Name = ?');
+               $stmt = $pdo->prepare('SELECT * FROM Users WHERE User_Name = ?');
                $stmt->execute(array($user_name));
                $password = $_POST["password"];
 

@@ -40,10 +40,10 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 <body>
-<h1>サインアップ画面</h1>
-<?php echo htmlspecialchars( $errorMessage,ENT_QUOTES);
-echo htmlspecialchars( $signupMessage,ENT_QUOTES);
- ?>
+    <h1>サインアップ画面</h1>
+    <?php echo htmlspecialchars( $errorMessage,ENT_QUOTES);
+    echo htmlspecialchars( $signupMessage,ENT_QUOTES);
+    ?>
     <form id="signupForm" method="POST">
         <p>ユーザー名(10字以内)</p><input type="text" id="user_name" name="user_name" maxlength="10" required>
         <!-- DOMをいじられると１０字以上入れられる -->

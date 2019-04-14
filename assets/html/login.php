@@ -24,7 +24,7 @@
                     if($row = $stmt->fetch(PDO::FETCH_ASSOC)){
                         if(password_verify($password, $row["User_Password"])){
                         session_regenerate_id(true);
-                        $_SESSION["NAME"] = $row["User_name"];
+                        $_SESSION["Name"] = $row["User_Name"];
                         $_SESSION["ID"]=$row["User_Id"];
                         header("Location: main.php");
                         exit();
@@ -51,7 +51,8 @@
 <html>
 <head>
     <title>ログイン画面</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link href="vendor/bootstrap/css/bootstrap.min.css" type="text/css" rel="stylesheet">
+    <link href="css/simple-sidebar.css" type="text/css" rel="stylesheet">
 </head>
 
 <body>
@@ -62,8 +63,8 @@
         <input type="submit" name="login" class="btn btn-primary" value="ログイン">
     </form>
     <form method="POST"><input type="submit" name="signup" class="btn btn-outline-primary" value="サインアップ"></form>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
 
 

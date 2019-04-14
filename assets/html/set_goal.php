@@ -10,33 +10,6 @@
 
     $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8',$db['host'],$db['dbname']);
 
-    if(isset($_POST["back_page"])){
-        header("Location: main.php");
-    }
-
-    if(isset($_POST["ok"])){
-        if(isset($_POST["object"])){
-            $object_html ='value="'.htmlspecialchars($_POST["object"]).'"';
-        }
-        if(isset($_POST["term"])){
-             if($_POST["term"] == "7"){     //数字は日数を意味する一週間なら7日
-                $Check_1w = "selected";
-             } 
-             elseif($_POST["term"] == "14"){
-                $Check_2w = "selected";
-             }
-             elseif($_POST["term"] == "30"){
-                $Check_1m = "selected";
-             }
-        }
-        if(isset($_POST["quantitiy"])){
-            $quantitiy_html ='value="'.htmlspecialchars($_POST["quantitiy"]).'"';
-        }
-        if(isset($_POST["way"])){
-            $way_html ='value="'.htmlspecialchars($_POST["way"]).'"';
-        }
-    }
-
     if(isset($_POST["send_data"])){
         try{
             $Start_Date = (int)date("Ymd");
@@ -44,11 +17,11 @@
             $End_Date = time()+($Alter_Term*24*60*60);
             $End_Date = (int)date("Ymd",$End_Date);
             $pdo = new PDO($dsn,$db['user'],$db['pass'],array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
-            $stmt = $pdo->prepare("SELECT COUNT(*) FROM Tasks WHERE Task_Id = ?");
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM Tasks WHERE Task_User_Id = ? AND End_Flag != 1");
             $stmt->execute(array($_SESSION["ID"]));
             $Recode_Check = $stmt->fetch(PDO::FETCH_NUM);
             if($Recode_Check[0] == 0){
-                $stmt = $pdo->prepare("INSERT INTO Tasks(Task_Id, Goal, Task,Way, Period, Start_Date, End_Date) value(?,?,?,?,?,?,?)");
+                $stmt = $pdo->prepare("INSERT INTO Tasks(Task_User_Id, Goal, Task,Way, Period, Start_Date, End_Date) value(?,?,?,?,?,?,?)");
                 $stmt->execute(array($_SESSION["ID"],$_POST["object"],$_POST["quantitiy"],$_POST["way"],$_POST["term"],$Start_Date,$End_Date));
                 $_SESSION["userMessage"] = "登録しました！";
             }else{
@@ -60,34 +33,58 @@
         }
     }
 ?>
-
 <html>
 <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/simple-sidebar.css" rel="stylesheet">
 </head>
 <body>
-    <?php  echo htmlspecialchars($_SESSION["userMessage"],ENT_QUOTES);?>
-    <nav class="navbar  navbar-default">
-        <ul class="nav navbar-nav">
-        <li class="active"><a href="main.php">HOME</a></li>
-        <li><a href="set_goal.php">目標設定</a></li>
-        </ul>
-    </nav>
-    <form method="POST">
-        <input type='text' name='object' <?php echo $object_html?>>
-        <select name="term">
-        <option value="7" <?php echo $Check_1w?>>1週間</option>
-        <option value="14" <?php echo $Check_2w?>>2週間</option>
-        <option value="30" <?php echo $Check_1m?>>1ヶ月</option>
-        </select>
-        <input type="text" name="quantitiy" <?php echo $quantitiy_html?>>
-        <input type="text" name="way" <?php echo $way_html?>>
-        <input type="submit" name="ok" class="btn btn-primary"value="OK!">
-        <input type="submit" name="back" class="btn btn-outline-primary"value="前に戻る">
-        <input type="submit" name="send_data" class="btn btn-primary"value="完了">
-    </form>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <div class="d-flex" id="wrapper">
+
+    <div id="page-content-wrapper">
+
+      <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+
+        <form method="POST">
+          <input type="submit" name="end_task" class="btn btn-primary" value="今日の分終了！">
+        </form>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+            <li class="nav-item active">
+              <a class="nav-link" href="main.php">ホーム <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="set_goal.php">目標作成</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      <div class="container-fluid">
+        <?php  echo htmlspecialchars($_SESSION["userMessage"],ENT_QUOTES);?>
+        <form method="POST">
+            <p>目標</p><input type='text' name='object'>
+            <p>期間</p><select name="term">
+                <option value="7" >1週間</option>
+                <option value="14" >2週間</option>
+                <option value="30" >1ヶ月</option>
+            </select>
+            <p>量</p><input type="text" name="quantitiy" >
+            <p>方法</p><input type="text" name="way" >
+            <input type="submit" name="send_data" class="btn btn-primary"value="完了">
+        </form>
+      </div>
+    </div>
+  </div>
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

@@ -6,6 +6,7 @@ $db["pass"] = "root";
 $db["dbname"] = "my_system";
 
 $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $db['host'], $db['dbname']);
+$pdo = new PDO($dsn, $db['user'], $db['pass'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
 $_SESSION["userMessage"] = null;
 $_SESSION["DateOutMessage"] = null;
@@ -13,7 +14,6 @@ $_SESSION["tasks"] = "";
 $_SESSION["mokuhyo"] = "";
 
 try {
-  $pdo = new PDO($dsn, $db['user'], $db['pass'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
   $stmt = $pdo->prepare("SELECT * FROM Users,Tasks WHERE User_Id = ? AND Users.User_Id = Tasks.Task_User_Id AND Tasks.End_Flag =0");
   $stmt->execute(array($_SESSION["ID"]));
   $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -26,7 +26,7 @@ try {
     preg_match("/[0-9０－９]+/", $row["Task"], $today_task_num);  //Taskから正規表現で数字を抜く
     preg_match_all("/[^0-9]+/", $row["Task"], $today_task_stmt, PREG_SET_ORDER); //Taskから正規表現で数字以外を抜く
     $today_task_num[0] = ceil($today_task_num[0] / $row["Period"]);
-    $_SESSION["tasks"] = sprintf("お疲れ様です%sさん\n今日は%sをやりましょう", $_SESSION["Name"], $today_task_stmt[0][0] . $today_task_num[0] . $today_task_stmt[1][0]);
+    $_SESSION["tasks"] = sprintf("お疲れ様です%sさん\nやるべきこと：%s", $_SESSION["Name"], $today_task_stmt[0][0] . $today_task_num[0] . $today_task_stmt[1][0]);
   }
 } catch (PDOException $e) {
   $_SESSION["userMessage"] = $e->getmessage();
@@ -56,13 +56,13 @@ if (isset($_POST["end_task"])) {
 
 if ($row["Task_Counter"] == $row["Period"] && $koushin == 0) {
   $_SESSION["userMessage"] = "おめでとうございます！目標を達成しました！";
-  $stmt = $pdo->prepare("UPDATE Tasks SET End_Flag = 1 WHERE End_Flag = 0");
-  $stmt->execute();
+  $stmt = $pdo->prepare("UPDATE Tasks SET End_Flag = 1 WHERE End_Flag = 0 AND Task_User_Id = ?");
+  $stmt->execute(array($_SESSION["ID"]));
 }
 
-if (isset($_POST["Delete_Flag"])) {
-  $stmt = $pdo->prepare("UPDATE Tasks SET End_Flag = 1 WHERE End_Flag = 0");
-  $stmt->execute();
+if ($_POST["Delete_Flag"] == 1) {
+  $stmt = $pdo->prepare("UPDATE Tasks SET End_Flag = 1 WHERE End_Flag = 0 AND Task_User_Id = ?");
+  $stmt->execute(array($_SESSION["ID"]));
 }
 ?>
 
@@ -92,7 +92,6 @@ if (isset($_POST["Delete_Flag"])) {
             alert('削除しました');
           })
         }
-        location:reload();
         </script>";
   } ?>
 

@@ -6,7 +6,7 @@
     $db["dbname"] = "my_system";
 
     $_SESSION["errorMessage"] = "";
-    $_SESSION["userMessage"] = "";
+    $_SESSION["userMessage"] = null;
 
     $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8',$db['host'],$db['dbname']);
 
@@ -41,15 +41,15 @@
     <link href="css/simple-sidebar.css" rel="stylesheet">
 </head>
 <body>
+    <?php if(isset($_SESSION["userMessage"])){
+      echo "<div class='alert alert-primary' role='alert'>".$_SESSION["userMessage"]."</div>";
+    }?>
+
     <div class="d-flex" id="wrapper">
 
     <div id="page-content-wrapper">
 
       <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
-
-        <form method="POST">
-          <input type="submit" name="end_task" class="btn btn-primary" value="今日の分終了！">
-        </form>
 
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
@@ -68,16 +68,15 @@
       </nav>
 
       <div class="container-fluid">
-        <?php  echo htmlspecialchars($_SESSION["userMessage"],ENT_QUOTES);?>
         <form method="POST">
-            <p>目標</p><input type='text' name='object'>
-            <p>期間</p><select name="term">
-                <option value="7" >1週間</option>
-                <option value="14" >2週間</option>
-                <option value="30" >1ヶ月</option>
+            <p>目標</p><input type='text' name='object' required>
+            <p>達成期間</p><select name="term">
+                <option value="7">1週間</option>
+                <option value="14">2週間</option>
+                <option value="30">1ヶ月</option>
             </select>
-            <p>量</p><input type="text" name="quantitiy" >
-            <p>方法</p><input type="text" name="way" >
+            <p>達成手段</p><input type="text" name="quantitiy" >
+            <p>達成手順</p><input type="text" name="way" >
             <input type="submit" name="send_data" class="btn btn-primary"value="完了">
         </form>
       </div>

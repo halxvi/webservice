@@ -15,8 +15,8 @@
             //ユーザ情報チェック
             
             try{
+                //データベースにアクセス，エラーなら例外を投げる
                $pdo= new PDO($dsn,$db["user"], $db["pass"],array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
-
                $stmt = $pdo->prepare('SELECT * FROM Users WHERE User_Name = ?');
                $stmt->execute(array($user_name));
                $password = $_POST["password"];
@@ -47,22 +47,27 @@
     }
 ?>
 
-
 <html>
 <head>
     <title>ログイン画面</title>
     <link href="vendor/bootstrap/css/bootstrap.min.css" type="text/css" rel="stylesheet">
-    <link href="css/simple-sidebar.css" type="text/css" rel="stylesheet">
 </head>
 
 <body>
-<?php echo htmlspecialchars( $errorMessage,ENT_QUOTES); ?>
-    <form id="loginForm" method="POST">
-        <p>ユーザー名</p><input type="text" id="user_name" name="user_name" required>
-        <p>password</p><input type="password" id="password" name="password" required>
-        <input type="submit" name="login" class="btn btn-primary" value="ログイン">
-    </form>
-    <form method="POST"><input type="submit" name="signup" class="btn btn-outline-primary" value="サインアップ"></form>
+    <div id="txt" class="center-block">
+        <h1>ログイン</h1>
+        <?php echo htmlspecialchars( $errorMessage,ENT_QUOTES); ?>
+    
+        <form id="loginForm" method="POST">
+            <label class="font-weight-bold">ユーザー名:<input type="text" id="user_name" name="user_name" required></label>
+            <br>
+            <label class="font-weight-bold">password:<input type="password" id="password" name="password" required></label>
+            <br><input type="submit" name="login" class="btn btn-primary" value="ログイン">
+        </form>
+        <form method="POST">
+            <input type="submit" name="signup" class="btn btn-outline-primary" value="サインアップ">
+        </form>
+    </div>
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>

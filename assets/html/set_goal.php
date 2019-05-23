@@ -19,7 +19,7 @@ $End_Date = (int)date("Ymd", $End_Date);
 
 if (isset($_POST["send_data"])) {
   try {
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM Tasks WHERE Task_User_Id = ? AND End_Flag != 1");
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM Tasks WHERE Task_User_Id = ? AND End_Flag = 0");
     $stmt->execute(array($_SESSION["ID"]));
     $Recode_Check = $stmt->fetch(PDO::FETCH_NUM);
     if ($Recode_Check[0] == 0) {

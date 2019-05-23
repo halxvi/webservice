@@ -33,18 +33,24 @@ try {
 }
 
 $DateNow = (int)date("Ymd");
-$koushin = ($DateNow - (int)$row["Task_Counter"]) - (int)$row["Start_Date"];
-$DateOut = (int)$row["End_Date"] - $DateNow;
+$koushin = $DateNow + 1 - $row["Task_Counter"] - $row["Start_Date"];
+$DateOut = $DateNow - $row["End_Date"];
 
-if (isset($_POST["end_task"])) {
-  if ($DateOut > 1 && $koushin > 1) {
-    $_SESSION["DateOutMessage"] = "予定より" . $DateOut . "日遅れています 現在の目標を削除しますか？";
+if (isset($_POST["end_task"]) && isset($row["Task_No"])) {
+  //現在のタスクがある状態で押すと動く
+
+  if ($DateOut > 1) {
+    $_SESSION["userMessage"] = "目標達成予定日を過ぎてしまいました 新しい目標を設定してください";
+    $_POST["Delete_Flag"] = 1;
   }
-  if ($koushin == 1) {
+  //予定日を過ぎていないか確認
+  if ($koushin > 1) {
+    $_SESSION["AlertMessage"] = "予定より" . $koushin . "日遅れています　継続しますか？";
+  } elseif ($koushin == 1) {
     try {
-      $koushin_flag = (int)$row["Task_Counter"] + 1;
+      $AddCounter = $koushin;
       $stmt = $pdo->prepare("UPDATE Tasks SET Task_Counter =? WHERE End_Flag =0");
-      $stmt->execute(array($koushin_flag));
+      $stmt->execute(array($AddCounter));
       $_SESSION["userMessage"] = "今日もお疲れ様です！";
     } catch (PDOException $e) {
       $_SESSION["userMessage"] = $e->getmessage();
@@ -64,6 +70,15 @@ if ($_POST["Delete_Flag"] == 1) {
   $stmt = $pdo->prepare("UPDATE Tasks SET End_Flag = 1 WHERE End_Flag = 0 AND Task_User_Id = ?");
   $stmt->execute(array($_SESSION["ID"]));
 }
+if ($_POST["Keep_Flag"] == 1) {
+  try {
+    $AddCounter = $koushin - 1;
+    $stmt = $pdo->prepare("UPDATE Tasks SET Task_Counter =? WHERE End_Flag =0");
+    $stmt->execute(array($AddCounter));
+  } catch (PDOException $e) {
+    $_SESSION["userMessage"] = $e->getmessage();
+  }
+}
 ?>
 
 <html>
@@ -82,14 +97,20 @@ if ($_POST["Delete_Flag"] == 1) {
   <?php if (isset($_SESSION["userMessage"])) {
     echo "<div class='alert alert-primary' role='alert'>" . $_SESSION["userMessage"] . "</div>";
   } ?>
-  <?php if (isset($_SESSION["DateOutMessage"])) {
+  <?php if (isset($_SESSION["AlertMessage"])) {
     echo "<script>
-        var result = window.confirm('" . $_SESSION["DateOutMessage"] . "');
+        var result = window.confirm('" . $_SESSION["AlertMessage"] . "');
         if(result){
           $.post('main.php',
           {Delete_Flag: 1},
           function(data){
-            alert('削除しました');
+            alert('目標を削除しました');
+          })
+        }else{
+          $.post('main.php',
+          {Keep_Flag: 1},
+          function(data){
+            alert('遅れていても大丈夫です！　継続していきましょう！');
           })
         }
         </script>";

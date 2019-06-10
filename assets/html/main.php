@@ -13,10 +13,19 @@ $_SESSION["DateOutMessage"] = null;
 $_SESSION["tasks"] = "";
 $_SESSION["mokuhyo"] = "";
 
+$DateNow = (int)date("Ymd");
+$koushin = $DateNow + 1 - $row["Task_Counter"] - $row["Start_Date"];
+$DateOut = $DateNow - $row["End_Date"];
+
 try {
   $stmt = $pdo->prepare("SELECT * FROM Users,Tasks WHERE User_Id = ? AND Users.User_Id = Tasks.Task_User_Id AND Tasks.End_Flag =0");
   $stmt->execute(array($_SESSION["ID"]));
   $row = $stmt->fetch(PDO::FETCH_ASSOC);
+  if ($DateOut > 1 && $row["Goal"]) {
+    //予定日を過ぎていないか確認
+    $_SESSION["userMessage"] = "目標達成予定日を過ぎてしまいました 新しい目標を設定してください";
+    $_POST["Delete_Flag"] = 1;
+  }
   if (isset($row["Goal"])) {
     $_SESSION["mokuhyo"] = sprintf("現在の目標は%sです\n", $row["Goal"]);
   } else {
@@ -26,24 +35,14 @@ try {
     preg_match("/[0-9０－９]+/", $row["Task"], $today_task_num);  //Taskから正規表現で数字を抜く
     preg_match_all("/[^0-9]+/", $row["Task"], $today_task_stmt, PREG_SET_ORDER); //Taskから正規表現で数字以外を抜く
     $today_task_num[0] = ceil($today_task_num[0] / $row["Period"]);
-    $_SESSION["tasks"] = sprintf("お疲れ様です%sさん\nやるべきこと：%s", $_SESSION["Name"], $today_task_stmt[0][0] . $today_task_num[0] . $today_task_stmt[1][0]);
+    $_SESSION["tasks"] = sprintf("お疲れ様です%sさん\n%s日継続しています\nやるべきこと：%s", $_SESSION["Name"], $row["Task_Counter"], $today_task_stmt[0][0] . $today_task_num[0] . $today_task_stmt[1][0]);
   }
 } catch (PDOException $e) {
   $_SESSION["userMessage"] = $e->getmessage();
 }
 
-$DateNow = (int)date("Ymd");
-$koushin = $DateNow + 1 - $row["Task_Counter"] - $row["Start_Date"];
-$DateOut = $DateNow - $row["End_Date"];
-
 if (isset($_POST["end_task"]) && isset($row["Task_No"])) {
   //現在のタスクがある状態で押すと動く
-
-  if ($DateOut > 1) {
-    $_SESSION["userMessage"] = "目標達成予定日を過ぎてしまいました 新しい目標を設定してください";
-    $_POST["Delete_Flag"] = 1;
-  }
-  //予定日を過ぎていないか確認
   if ($koushin > 1) {
     $_SESSION["AlertMessage"] = "予定より" . $koushin . "日遅れています　継続しますか？";
   } elseif ($koushin == 1) {
@@ -144,13 +143,18 @@ if ($_POST["Keep_Flag"] == 1) {
       </nav>
 
       <div class="container-fluid">
-        <?php
-        echo htmlspecialchars($_SESSION["mokuhyo"]);
-        echo htmlspecialchars($_SESSION["tasks"]);
-        ?>
+        <div class="cl_mokuhyo">
+          <?php
+          echo htmlspecialchars($_SESSION["mokuhyo"]);
+          ?>
+        </div>
+        <div class="cl_tasks">
+          <?php
+          echo htmlspecialchars($_SESSION["tasks"]);
+          ?>
+        </div>
       </div>
     </div>
-  </div>
 
 
 </body>

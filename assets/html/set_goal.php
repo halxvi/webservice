@@ -1,30 +1,29 @@
 <?php
-session_start();
-$db['host'] = "192.168.99.100:13306";
+$db['host'] = "db:3306";
 $db["user"] = "root";
 $db["pass"] = "root";
 $db["dbname"] = "my_system";
 
-$_SESSION["errorMessage"] = "";
+$_SESSION["errorMessage"] = null;
 $_SESSION["userMessage"] = null;
 $_SESSION["Task_Delete_Message"] = null;
 
 $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $db['host'], $db['dbname']);
 $pdo = new PDO($dsn, $db['user'], $db['pass'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
-$Start_Date = (int)date("Ymd");
-$Alter_Term = (int)$_POST["term"];
-$End_Date = time() + ($Alter_Term * 24 * 60 * 60);
-$End_Date = (int)date("Ymd", $End_Date);
+$StartDate = (int) date("Ymd");
+$Alter_Term = (int) $_POST["term"];
+$EndDate = time() + ($Alter_Term * 24 * 60 * 60);
+$EndDate = (int) date("Ymd", $EndDate);
 
 if (isset($_POST["send_data"])) {
   try {
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM Tasks WHERE Task_User_Id = ? AND End_Flag = 0");
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM Tasks WHERE TaskUserId = ? AND EndFlag = 0");
     $stmt->execute(array($_SESSION["ID"]));
     $Recode_Check = $stmt->fetch(PDO::FETCH_NUM);
     if ($Recode_Check[0] == 0) {
-      $stmt = $pdo->prepare("INSERT INTO Tasks(Task_User_Id, Goal, Task,Way, Period, Start_Date, End_Date) value(?,?,?,?,?,?,?)");
-      $stmt->execute(array($_SESSION["ID"], $_POST["object"], $_POST["quantitiy"], $_POST["way"], $_POST["term"], $Start_Date, $End_Date));
+      $stmt = $pdo->prepare("INSERT INTO Tasks(TaskUserId, Goal, Task,Way, Period, StartDate, EndDate) value(?,?,?,?,?,?,?)");
+      $stmt->execute(array($_SESSION["ID"], $_POST["object"], $_POST["quantitiy"], $_POST["way"], $_POST["term"], $StartDate, $EndDate));
       $_SESSION["userMessage"] = "登録しました！";
     } else {
       $_SESSION["userMessage"] = "既に目標があります";
@@ -38,7 +37,7 @@ if (isset($_POST["task_delete_opt"])) {
   $_SESSION["Task_Delete_Message"] = "目標を削除しますか？";
 }
 if ($_POST["Task_Delete_Flag"] == 1) {
-  $stmt = $pdo->prepare("UPDATE Tasks SET End_Flag = 1 WHERE End_Flag = 0 AND Task_User_Id = ? ");
+  $stmt = $pdo->prepare("UPDATE Tasks SET EndFlag = 1 WHERE EndFlag = 0 AND TaskUserId = ? ");
   $stmt->execute(array($_SESSION["ID"]));
 }
 ?>

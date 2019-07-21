@@ -1,6 +1,5 @@
 <?php
-session_start();
-$db['host'] = "192.168.99.100:13306";
+$db['host'] = "db:3306";
 $db["user"] = "root";
 $db["pass"] = "root";
 $db["dbname"] = "my_system";
@@ -10,11 +9,11 @@ $pdo = new PDO($dsn, $db['user'], $db['pass'], array(PDO::ATTR_ERRMODE => PDO::E
 
 $_SESSION["userMessage"] = null;
 $_SESSION["DateOutMessage"] = null;
-$_SESSION["tasks"] = "";
-$_SESSION["mokuhyo"] = "";
+$_SESSION["tasks"] = null;
+$_SESSION["mokuhyo"] = null;
 
 try {
-  $stmt = $pdo->prepare("SELECT * FROM Users,Tasks WHERE User_Id = ? AND Users.User_Id = Tasks.Task_User_Id AND Tasks.End_Flag =0");
+  $stmt = $pdo->prepare("SELECT * FROM Users,Tasks WHERE UserId = ? AND Users.UserId = Tasks.TaskUserId AND Tasks.EndFlag =0");
   $stmt->execute(array($_SESSION["ID"]));
   $row = $stmt->fetch(PDO::FETCH_ASSOC);
   if (isset($row["Goal"])) {
@@ -23,8 +22,8 @@ try {
     $_SESSION["userMessage"] = sprintf("ようこそ%sさん\n目標を作りましょう", $_SESSION["Name"]);
   }
   if (isset($row["Task"])) {
-    preg_match("/[0-9０－９]+/", $row["Task"], $today_task_num);  //Taskから正規表現で数字を抜く
-    preg_match_all("/[^0-9]+/", $row["Task"], $today_task_stmt, PREG_SET_ORDER); //Taskから正規表現で数字以外を抜く
+    preg_match("/[0-9０－９]+/", $row["Task"], $today_task_num);
+    preg_match_all("/[^0-9]+/", $row["Task"], $today_task_stmt, PREG_SET_ORDER);
     $today_task_num[0] = ceil($today_task_num[0] / $row["Period"]);
     $_SESSION["tasks"] = sprintf("お疲れ様です%sさん\nやるべきこと：%s", $_SESSION["Name"], $today_task_stmt[0][0] . $today_task_num[0] . $today_task_stmt[1][0]);
   }
@@ -32,11 +31,11 @@ try {
   $_SESSION["userMessage"] = $e->getmessage();
 }
 
-$DateNow = (int)date("Ymd");
-$koushin = $DateNow + 1 - $row["Task_Counter"] - $row["Start_Date"];
-$DateOut = $DateNow - $row["End_Date"];
+$DateNow = (int) date("Ymd");
+$koushin = $DateNow + 1 - $row["TaskCounter"] - $row["StartDate"];
+$DateOut = $DateNow - $row["EndDate"];
 
-if (isset($_POST["end_task"]) && isset($row["Task_No"])) {
+if (isset($_POST["end_task"]) && isset($row["TaskNo"])) {
   //現在のタスクがある状態で押すと動く
 
   if ($DateOut > 1) {
@@ -49,7 +48,7 @@ if (isset($_POST["end_task"]) && isset($row["Task_No"])) {
   } elseif ($koushin == 1) {
     try {
       $AddCounter = $koushin;
-      $stmt = $pdo->prepare("UPDATE Tasks SET Task_Counter =? WHERE End_Flag =0");
+      $stmt = $pdo->prepare("UPDATE Tasks SET TaskCounter =? WHERE EndFlag =0");
       $stmt->execute(array($AddCounter));
       $_SESSION["userMessage"] = "今日もお疲れ様です！";
     } catch (PDOException $e) {
@@ -60,20 +59,20 @@ if (isset($_POST["end_task"]) && isset($row["Task_No"])) {
   }
 }
 
-if ($row["Task_Counter"] == $row["Period"] && $koushin == 0) {
+if ($row["TaskCounter"] == $row["Period"] && $koushin == 0) {
   $_SESSION["userMessage"] = "おめでとうございます！目標を達成しました！";
-  $stmt = $pdo->prepare("UPDATE Tasks SET End_Flag = 1 WHERE End_Flag = 0 AND Task_User_Id = ?");
+  $stmt = $pdo->prepare("UPDATE Tasks SET EndFlag = 1 WHERE EndFlag = 0 AND TaskUserId = ?");
   $stmt->execute(array($_SESSION["ID"]));
 }
 
 if ($_POST["Delete_Flag"] == 1) {
-  $stmt = $pdo->prepare("UPDATE Tasks SET End_Flag = 1 WHERE End_Flag = 0 AND Task_User_Id = ?");
+  $stmt = $pdo->prepare("UPDATE Tasks SET EndFlag = 1 WHERE EndFlag = 0 AND TaskUserId = ?");
   $stmt->execute(array($_SESSION["ID"]));
 }
 if ($_POST["Keep_Flag"] == 1) {
   try {
     $AddCounter = $koushin - 1;
-    $stmt = $pdo->prepare("UPDATE Tasks SET Task_Counter =? WHERE End_Flag =0");
+    $stmt = $pdo->prepare("UPDATE Tasks SET TaskCounter =? WHERE EndFlag =0");
     $stmt->execute(array($AddCounter));
   } catch (PDOException $e) {
     $_SESSION["userMessage"] = $e->getmessage();

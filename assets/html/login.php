@@ -1,5 +1,4 @@
 <?php
-session_start();
 $db['host'] = "db:3306";
 $db["user"] = "root";
 $db["pass"] = "root";
@@ -17,7 +16,7 @@ if (isset($_POST["login"])) {
 
         if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             if (password_verify($password, $row["UserPassword"])) {
-                session_regenerate_id(true);
+                session_start();
                 $_SESSION["Name"] = $row["UserName"];
                 $_SESSION["ID"] = $row["UserId"];
                 header("Location: main.php");

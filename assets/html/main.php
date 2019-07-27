@@ -1,11 +1,33 @@
 <?php
-$db['host'] = "db:3306";
-$db["user"] = "root";
-$db["pass"] = "root";
-$db["dbname"] = "my_system";
+class DBContoller
+{
+  private $host = "db:3306";
+  private $user = "root";
+  private $pass = "root";
+  private $dbname = "my_system";
 
-$dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $db['host'], $db['dbname']);
-$pdo = new PDO($dsn, $db['user'], $db['pass'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+  function getDBHost()
+  {
+    return $this->host;
+  }
+  function getDBUser()
+  {
+    return $this->user;
+  }
+  function getDBPass()
+  {
+    return $this->pass;
+  }
+  function getDBName()
+  {
+    return $this->dbname;
+  }
+}
+
+$db = new DBContoller();
+
+$dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $db->getDBHost(), $db->getDBName());
+$pdo = new PDO($dsn, $db->getDBUser(), $db->getDBPass(), array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
 $_SESSION["userMessage"] = null;
 $_SESSION["DateOutMessage"] = null;
@@ -36,13 +58,10 @@ $koushin = $DateNow + 1 - $row["TaskCounter"] - $row["StartDate"];
 $DateOut = $DateNow - $row["EndDate"];
 
 if (isset($_POST["end_task"]) && isset($row["TaskNo"])) {
-  //現在のタスクがある状態で押すと動く
-
   if ($DateOut > 1) {
     $_SESSION["userMessage"] = "目標達成予定日を過ぎてしまいました 新しい目標を設定してください";
     $_POST["Delete_Flag"] = 1;
   }
-  //予定日を過ぎていないか確認
   if ($koushin > 1) {
     $_SESSION["AlertMessage"] = "予定より" . $koushin . "日遅れています　継続しますか？";
   } elseif ($koushin == 1) {
@@ -94,11 +113,11 @@ if ($_POST["Keep_Flag"] == 1) {
 <body>
 
   <?php if (isset($_SESSION["userMessage"])) {
-    echo "<div class='alert alert-primary' role='alert'>" . $_SESSION["userMessage"] . "</div>";
+    echo "<div class='alert alert-primary' role='alert'>" . htmlspecialchars($_SESSION["userMessage"]) . "</div>";
   } ?>
   <?php if (isset($_SESSION["AlertMessage"])) {
     echo "<script>
-        var result = window.confirm('" . $_SESSION["AlertMessage"] . "');
+        var result = window.confirm('" . htmlspecialchars($_SESSION["AlertMessage"]) . "');
         if(result){
           $.post('main.php',
           {Delete_Flag: 1},
@@ -132,6 +151,9 @@ if ($_POST["Keep_Flag"] == 1) {
             </li>
             <li class="nav-item">
               <a class="nav-link" href="set_goal.php">目標作成</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="logout.php">ログアウト</a>
             </li>
           </ul>
         </div>

@@ -29,6 +29,7 @@ $db = new DBContoller();
 $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $db->getDBHost(), $db->getDBName());
 $pdo = new PDO($dsn, $db->getDBUser(), $db->getDBPass(), array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
+session_start();
 $_SESSION["userMessage"] = null;
 $_SESSION["DateOutMessage"] = null;
 $_SESSION["tasks"] = null;
@@ -109,9 +110,9 @@ if ($_POST["Keep_Flag"] == 1) {
 </head>
 <script src="vendor/jquery/jquery.min.js"></script>
 <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="js/main.js"></script>
 
 <body>
-
   <?php if (isset($_SESSION["userMessage"])) {
     echo "<div class='alert alert-primary' role='alert'>" . htmlspecialchars($_SESSION["userMessage"]) . "</div>";
   } ?>
@@ -164,7 +165,7 @@ if ($_POST["Keep_Flag"] == 1) {
 
       </nav>
 
-      <div class="container-fluid">
+      <div class="container">
         <?php
         echo htmlspecialchars($_SESSION["mokuhyo"]);
         echo htmlspecialchars($_SESSION["tasks"]);

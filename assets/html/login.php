@@ -12,20 +12,16 @@ if (isset($_POST["login"])) {
         $pdo = new PDO($dsn, $db["user"], $db["pass"], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
         $stmt = $pdo->prepare('SELECT * FROM Users WHERE UserName = ?');
         $stmt->execute(array($UserName));
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
         $password = $_POST["password"];
 
-        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            if (password_verify($password, $row["UserPassword"])) {
-                session_start();
-                $_SESSION["Name"] = $row["UserName"];
-                $_SESSION["ID"] = $row["UserId"];
-                header("Location: main.php");
-                exit();
-            } else {
-                $errorMessage = "ぱすわーどえらー";
-            }
+        if (password_verify($password, $row["UserPassword"])) {
+            session_start();
+            $_SESSION["Name"] = $row["UserName"];
+            $_SESSION["ID"] = $row["UserId"];
+            header("Location: main.php");
         } else {
-            $errorMessage = "なんかまちがってます";
+            $errorMessage = "ぱすわーどえらー";
         }
     } catch (PDOException $e) {
         $errorMessage = "データベースエラー";
@@ -48,18 +44,20 @@ if (isset($_POST["signup"])) {
 <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
 <body>
-    <div class="container">
-        <h1>ログイン</h1>
-        <?php echo htmlspecialchars($errorMessage, ENT_QUOTES); ?>
-        <form id="loginForm" method="POST">
-            <label class="font-weight-bold">ユーザー名:<input type="text" id="UserName" name="UserName" required></label>
-            <br>
-            <label class="font-weight-bold">password:<input type="password" id="password" name="password" required></label>
-            <br><input type="submit" name="login" class="btn btn-primary" value="ログイン">
-        </form>
-        <form method="POST">
-            <input type="submit" name="signup" class="btn btn-outline-primary" value="サインアップ">
-        </form>
+    <?php echo htmlspecialchars($errorMessage, ENT_QUOTES); ?>
+    <div class="jumbotron">
+        <div class="container">
+            <h1 class="text-center">ログイン</h1>
+            <form id="loginForm" class="text-center" method="POST">
+                <label class="font-weight-bold" class="text-center">ユーザー名:<input type="text" id="UserName" name="UserName" required></label>
+                <br>
+                <label class="font-weight-bold">password:<input type="password" id="password" name="password" required></label>
+                <br><input type="submit" name="login" class="btn btn-primary" value="ログイン">
+            </form>
+            <form id="signupForm" class="text-center" method="POST">
+                <input type="submit" name="signup" class="btn btn-outline-primary" value="サインアップ">
+            </form>
+        </div>
     </div>
 
 </body>

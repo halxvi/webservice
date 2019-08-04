@@ -1,11 +1,14 @@
+<?php
+session_start();
+$_SESSION = array();
+if (ini_get("session.use_cookies")) {
+    $parms = session_get_cookie_params();
+    setcookie(session_name(), "", time() - 42000, $parms['path'] . $parms['domain'], $params["secure"], $params["httponly"]);
+};
+session_destroy();
+header("Location: login.php");
+?>
 <html>
 <meta charset="utf-8">
-<script>
-    var result = window.confirm('ログアウトしますか？');
-    if (result) {
-        <?php session_abort(); ?>
-        location.href = "login.php";
-    }
-</script>
 
 </html>

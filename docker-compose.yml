@@ -8,6 +8,7 @@ services:
     - ./assets/css:/var/www/css
     - ./assets/vendor:/var/www/vendor
     - ./assets/html:/var/www/html
+    - ./assets/js:/var/www/js
     ports:
       - 8080:80
     depends_on: 
@@ -19,6 +20,8 @@ services:
     - ./assets:/var/www
     - ./assets/html:/var/www/html
     - ./assets/css:/var/www/css
+    - ./assets/js:/var/www/js
+    
     - ./assets/vendor:/var/www/vendor
     depends_on: 
     - db

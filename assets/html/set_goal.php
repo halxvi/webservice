@@ -4,6 +4,7 @@ $db["user"] = "root";
 $db["pass"] = "root";
 $db["dbname"] = "my_system";
 
+session_start();
 $_SESSION["errorMessage"] = null;
 $_SESSION["userMessage"] = null;
 $_SESSION["Task_Delete_Message"] = null;
@@ -87,6 +88,9 @@ if ($_POST["Task_Delete_Flag"] == 1) {
             </li>
             <li class="nav-item">
               <a class="nav-link" href="set_goal.php">目標作成</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="logout.php">ログアウト</a>
             </li>
           </ul>
         </div>

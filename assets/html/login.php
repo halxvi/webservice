@@ -20,12 +20,14 @@ if (isset($_POST["login"])) {
             $_SESSION["Name"] = $row["UserName"];
             $_SESSION["ID"] = $row["UserId"];
             header("Location: main.php");
+            exit();
         } else {
             $errorMessage = "ぱすわーどえらー";
         }
     } catch (PDOException $e) {
         $errorMessage = "データベースエラー";
         echo htmlspecialchars($e->getmessage(), ENT_QUOTES);
+        exit();
     }
 }
 if (isset($_POST["signup"])) {
@@ -38,6 +40,7 @@ if (isset($_POST["signup"])) {
 
 <head>
     <title>ログイン画面</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link href="vendor/bootstrap/css/bootstrap.min.css" type="text/css" rel="stylesheet">
 </head>
 <script src="vendor/jquery/jquery.min.js"></script>
@@ -45,21 +48,26 @@ if (isset($_POST["signup"])) {
 
 <body>
     <?php echo htmlspecialchars($errorMessage, ENT_QUOTES); ?>
-    <div class="jumbotron">
-        <div class="container">
-            <h1 class="text-center">ログイン</h1>
-            <form id="loginForm" class="text-center" method="POST">
-                <label class="font-weight-bold" class="text-center">ユーザー名:<input type="text" id="UserName" name="UserName" required></label>
-                <br>
-                <label class="font-weight-bold">password:<input type="password" id="password" name="password" required></label>
-                <br><input type="submit" name="login" class="btn btn-primary" value="ログイン">
-            </form>
-            <form id="signupForm" class="text-center" method="POST">
-                <input type="submit" name="signup" class="btn btn-outline-primary" value="サインアップ">
-            </form>
+    <div class="jumbotron" style="height:100% margin:0%">
+        <div class="container-fluid" style="height:100%">
+            <div class="d-flex flex-column">
+                <div class="align-self-center justify-content-center">ログイン</div>
+                <div class="align-self-center justify-content-center">
+                    <form id="loginForm" method="POST">
+                        <label class="font-weight-bold" class="text-center">ユーザー名:<input type="text" id="UserName" name="UserName" required></label>
+                        <br>
+                        <label class="font-weight-bold">password:<input type="password" id="password" name="password" required></label>
+                        <br><input type="submit" name="login" class="btn btn-primary" value="ログイン">
+                    </form>
+                </div>
+                <div class="align-self-center">
+                    <form id="signupForm" method="POST">
+                        <input type="submit" name="signup" class="btn btn-outline-primary" value="サインアップ">
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
-
 </body>
 
 

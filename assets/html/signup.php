@@ -22,6 +22,7 @@ if (isset($_POST["signup"])) {
 }
 if (isset($_POST["get_back"])) {
     header("Location: login.php");
+    exit();
 }
 ?>
 

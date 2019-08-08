@@ -1,4 +1,5 @@
 <?php
+require_once("config.php");
 $db['host'] = "db:3306";
 $db["user"] = "root";
 $db["pass"] = "root";

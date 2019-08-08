@@ -159,11 +159,11 @@ if ($_POST["Keep_Flag"] == 1) {
             </li>
           </ul>
         </div>
-
-        <form method="POST">
-          <input type="submit" name="end_task" class="btn btn-primary" value="今日の分終了！">
-        </form>
-
+        <div class="d-flex align-items-center justify-content-center m-1">
+          <form class="m-0" method="POST">
+            <input type="submit" name="end_task" class="btn btn-primary" value="今日の分終了！">
+          </form>
+        </div>
       </nav>
 
       <div class="container">

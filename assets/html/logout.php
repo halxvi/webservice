@@ -7,8 +7,4 @@ if (ini_get("session.use_cookies")) {
 };
 session_destroy();
 header("Location: login.php");
-?>
-<html>
-<meta charset="utf-8">
-
-</html>
+exit();

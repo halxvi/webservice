@@ -8,7 +8,7 @@ if (isset($_POST["signup"])) {
     $Password = Password_hash($_POST["password"], PASSWORD_DEFAULT);
     $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', dbhostname, dbname);
     try {
-        $pdo = new PDO($dsn, dbusername, dbpassword], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+        $pdo = new PDO($dsn, dbusername, dbpassword, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
         $stmt = $pdo->prepare('INSERT INTO Users(UserName,UserPassword) VALUE(?,?)');
         $stmt->execute(array($UserName, $Password));
         $signupMessage = "登録が完了しました";

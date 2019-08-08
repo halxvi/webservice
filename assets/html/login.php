@@ -1,15 +1,12 @@
 <?php
-$db['host'] = "db:3306";
-$db["user"] = "root";
-$db["pass"] = "root";
-$db["dbname"] = "my_system";
+require_once("config.php");
 $errorMessage = null;
 
 if (isset($_POST["login"])) {
     $UserName = $_POST["UserName"];
-    $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $db['host'], $db['dbname']);
+    $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', dbhostname, dbname);
     try {
-        $pdo = new PDO($dsn, $db["user"], $db["pass"], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+        $pdo = new PDO($dsn, dbusername, dbusername, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
         $stmt = $pdo->prepare('SELECT * FROM Users WHERE UserName = ?');
         $stmt->execute(array($UserName));
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -61,13 +58,13 @@ if (isset($_POST["signup"])) {
                     <div class="d-flex justify-content-center m-3">
                         <div class="form-group">
                             <label class="font-weight-bold">ユーザー名</label>
-                            <input type="text" id="UserName" name="UserName">
+                            <input type="text" id="UserName" class="border border-secondary rounded" name="UserName">
                         </div>
                     </div>
                     <div class="d-flex justify-content-center m-3">
                         <div class="form-group">
                             <label class="font-weight-bold">パスワード</label>
-                            <input type="password" id="password" name="password">
+                            <input type="password" id="password" class="border border-secondary rounded" name="password">
                         </div>
                     </div>
                     <div class="d-flex justify-content-center m-3">

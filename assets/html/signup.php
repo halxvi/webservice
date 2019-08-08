@@ -1,17 +1,14 @@
 <?php
-$db['host'] = "db:3306";
-$db["user"] = "root";
-$db["pass"] = "root";
-$db["dbname"] = "my_system";
+require_once("config.php");
 $errorMessage = null;
 $signupMessage = null;
 
 if (isset($_POST["signup"])) {
     $UserName = $_POST["UserName"];
     $Password = Password_hash($_POST["password"], PASSWORD_DEFAULT);
-    $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $db['host'], $db['dbname']);
+    $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', dbhostname, dbname);
     try {
-        $pdo = new PDO($dsn, $db["user"], $db["pass"], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+        $pdo = new PDO($dsn, dbusername, dbpassword], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
         $stmt = $pdo->prepare('INSERT INTO Users(UserName,UserPassword) VALUE(?,?)');
         $stmt->execute(array($UserName, $Password));
         $signupMessage = "登録が完了しました";
@@ -53,15 +50,15 @@ if (isset($_POST["get_back"])) {
                     <div class="d-flex justify-content-center m-3">
                         <div class="form-group">
                             <label class="font-weight-bold">ユーザー名</label>
-                            <input type="text" id="UserName" name="UserName" maxlength="10">
-                            <small class="form-text text-muted">[10文字以内]</small>
+                            <input type="text" id="UserName" class="border border-secondary rounded" name="UserName" maxlength="10">
+                            <small class="form-text font-weight-light text-muted">[10文字以内]</small>
                         </div>
                     </div>
                     <div class="d-flex justify-content-center m-3">
                         <div class="form-group">
                             <label class="font-weight-bold">パスワード</label>
-                            <input type="password" id="password" name="password" minlength="8">
-                            <small class="form-text text-muted">[8文字以上]</small>
+                            <input type="password" id="password" class="border border-secondary rounded" name="password" minlength="8">
+                            <small class="form-text font-weight-light text-muted">[8文字以上]</small>
                         </div>
                     </div>
                     <div class="d-flex justify-content-center m-3">

@@ -1,10 +1,11 @@
 <?php
+require_once("config.php");
 class DBContoller
 {
-  private $host = "db:3306";
-  private $user = "root";
-  private $pass = "root";
-  private $dbname = "my_system";
+  private $host = dbhostname;
+  private $user = dbusername;
+  private $pass = dbpassword;
+  private $dbname = dbname;
 
   function getDBHost()
   {

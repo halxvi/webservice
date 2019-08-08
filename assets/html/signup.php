@@ -46,20 +46,30 @@ if (isset($_POST["get_back"])) {
     <div class="container-fluid bg-light mx-auto" style="width:100%; height:100%;">
         <div class="d-flex align-items-center justify-content-center" style="height:100%">
             <div class="border border-info rounded p-4">
-                <div class="d-flex justify-content-center m-3">
+                <div class="d-flex justify-content-center m-4">
                     <h3>サインアップ</h3>
                 </div>
                 <form id="signupForm" method="POST">
-                    <label class="font-weight-bold m-2">
-                        ユーザー名<span class="text-muted m-1">[10字以内]</span>
-                    </label>
-                    <input type="text" id="UserName" name="UserName" maxlength="10">
-                    <br>
-                    <label class="font-weight-bold m-2">password</label>
-                    <input type="password" id="password" name="password">
-                    <br>
-                    <input type="submit" name="signup" class="btn btn-info m-3" value="登録">
-                    <input type="submit" name="get_back" class="btn btn-outline-info m-3" value=" 戻る">
+                    <div class="d-flex justify-content-center m-3">
+                        <div class="form-group">
+                            <label class="font-weight-bold">ユーザー名</label>
+                            <input type="text" id="UserName" name="UserName" maxlength="10">
+                            <small class="form-text text-muted">[10文字以内]</small>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center m-3">
+                        <div class="form-group">
+                            <label class="font-weight-bold">パスワード</label>
+                            <input type="password" id="password" name="password" minlength="8">
+                            <small class="form-text text-muted">[8文字以上]</small>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center m-3">
+                        <div class="form-group">
+                            <input type="submit" name="signup" class="btn btn-info m-3" value="登録">
+                            <input type="submit" name="get_back" class="btn btn-outline-info m-3" value=" 戻る">
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>

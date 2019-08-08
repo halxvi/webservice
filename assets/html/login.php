@@ -48,26 +48,36 @@ if (isset($_POST["signup"])) {
 <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
 <body>
+
     <?php echo htmlspecialchars($errorMessage, ENT_QUOTES); ?>
+
     <div class="container-fluid bg-light mx-auto" style="width:100%; height:100%;">
         <div class="d-flex align-items-center justify-content-center" style="height:100%">
             <div class="border border-info rounded p-4">
-                <div class="d-flex justify-content-center m-3">
+                <div class="d-flex justify-content-center m-4">
                     <h3>ログイン<h3>
                 </div>
                 <form id="loginForm" method="POST">
-                    <label class="font-weight-bold m-2">ユーザー名</label>
-                    <input type="text" id="UserName" name="UserName">
-                    <br>
-                    <label class="font-weight-bold m-2">password</label>
-                    <input type="password" id="password" name="password">
-                    <br>
-                    <input type="submit" name="login" class="btn btn-info m-3" value="ログイン">
-                    <input type="submit" name="signup" class="btn btn-outline-info m-3" value="サインアップ">
-                </form>
+                    <div class="d-flex justify-content-center m-3">
+                        <div class="form-group">
+                            <label class="font-weight-bold">ユーザー名</label>
+                            <input type="text" id="UserName" name="UserName">
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center m-3">
+                        <div class="form-group">
+                            <label class="font-weight-bold">パスワード</label>
+                            <input type="password" id="password" name="password">
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center m-3">
+                        <div class="form-group">
+                            <input type="submit" name="login" class="btn btn-info m-3" value="ログイン">
+                            <input type="submit" name="signup" class="btn btn-outline-info m-3" value="サインアップ">
+                        </div>
+                    </div>
             </div>
         </div>
-    </div>
     </div>
 </body>
 

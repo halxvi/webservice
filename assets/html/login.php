@@ -39,34 +39,35 @@ if (isset($_POST["signup"])) {
 <html>
 
 <head>
-    <title>ログイン画面</title>
+    <title>ログイン</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link href="vendor/bootstrap/css/bootstrap.min.css" type="text/css" rel="stylesheet">
+    <link href="css/color.scss" type="text/scss" rel="stylesheet">
 </head>
 <script src="vendor/jquery/jquery.min.js"></script>
 <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
 <body>
     <?php echo htmlspecialchars($errorMessage, ENT_QUOTES); ?>
-    <div class="jumbotron" style="height:100% margin:0%">
-        <div class="container-fluid" style="height:100%">
-            <div class="d-flex flex-column">
-                <div class="align-self-center justify-content-center">ログイン</div>
-                <div class="align-self-center justify-content-center">
-                    <form id="loginForm" method="POST">
-                        <label class="font-weight-bold" class="text-center">ユーザー名:<input type="text" id="UserName" name="UserName" required></label>
-                        <br>
-                        <label class="font-weight-bold">password:<input type="password" id="password" name="password" required></label>
-                        <br><input type="submit" name="login" class="btn btn-primary" value="ログイン">
-                    </form>
+    <div class="container-fluid bg-light mx-auto" style="width:100%; height:100%;">
+        <div class="d-flex align-items-center justify-content-center" style="height:100%">
+            <div class="border border-info rounded p-4">
+                <div class="d-flex justify-content-center m-3">
+                    <h3>ログイン<h3>
                 </div>
-                <div class="align-self-center">
-                    <form id="signupForm" method="POST">
-                        <input type="submit" name="signup" class="btn btn-outline-primary" value="サインアップ">
-                    </form>
-                </div>
+                <form id="loginForm" method="POST">
+                    <label class="font-weight-bold m-2">ユーザー名</label>
+                    <input type="text" id="UserName" name="UserName">
+                    <br>
+                    <label class="font-weight-bold m-2">password</label>
+                    <input type="password" id="password" name="password">
+                    <br>
+                    <input type="submit" name="login" class="btn btn-info m-3" value="ログイン">
+                    <input type="submit" name="signup" class="btn btn-outline-info m-3" value="サインアップ">
+                </form>
             </div>
         </div>
+    </div>
     </div>
 </body>
 

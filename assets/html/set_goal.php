@@ -104,7 +104,8 @@ if ($_POST["Task_Delete_Flag"] == 1) {
             <option value="14">2週間</option>
             <option value="30">1ヶ月</option>
           </select>
-          <p>達成手段（具体的な数字を含めるようにしてください　例：テキストを１００ページやる）</p><input type="text" name="quantitiy">
+          <p>達成手段<span class="text-muted">具体的な数字を含めるようにしてください　例：テキストを１００ページやる</span></p>
+          <input type="text" name="quantitiy">
           <p>達成手順</p><input type="text" name="way">
           <input type="submit" name="send_data" class="btn btn-primary" value="完了">
         </form>

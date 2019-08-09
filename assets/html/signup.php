@@ -3,7 +3,7 @@ require_once("config.php");
 function h($str)
 {
     return htmlspecialchars($str, ENT_QUOTES, "UTF-8");
-};
+}
 function numalphabetchecker($str)
 {
     $match = preg_match('/^[a-zA-Z0-9]+$/', $str);
@@ -42,7 +42,7 @@ if (isset($_POST["get_back"])) {
 }
 ?>
 
-<html lang="ja">
+<html>
 
 <head>
     <title>サインアップ</title>
@@ -57,8 +57,6 @@ if (isset($_POST["get_back"])) {
     <?php if (isset($signupMessage)) {
         echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . h($signupMessage) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
     } ?>
-
-    <?php echo htmlspecialchars($errorMessage, ENT_QUOTES); ?>
 
     <div class="container-fluid bg-light mx-auto" style="width:100%; height:100%;">
         <div class="d-flex align-items-center justify-content-center" style="height:100%">

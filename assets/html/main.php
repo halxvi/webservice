@@ -31,7 +31,7 @@ $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $db->getDBHost(), $db->
 $pdo = new PDO($dsn, $db->getDBUser(), $db->getDBPass(), array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
 session_start();
-$_SESSION["userMessage"] = null;
+$userMessage = null;
 $_SESSION["DateOutMessage"] = null;
 $_SESSION["tasks"] = null;
 $_SESSION["mokuhyo"] = null;
@@ -114,8 +114,8 @@ if ($_POST["Keep_Flag"] == 1) {
 <script src="js/main.js"></script>
 
 <body>
-  <?php if (isset($_SESSION["userMessage"])) {
-    echo "<div class='alert alert-primary' role='alert'>" . htmlspecialchars($_SESSION["userMessage"]) . "</div>";
+  <?php if (isset($userMessage)) {
+    echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . h($userMessage) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
   } ?>
   <?php if (isset($_SESSION["AlertMessage"])) {
     echo "<script>
@@ -155,7 +155,7 @@ if ($_POST["Keep_Flag"] == 1) {
               <a class="nav-link" href="set_goal.php">目標作成</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="logout.php">ログアウト</a>
+              <a class="nav-link" data-toggle="modal" data-target="#logoutModal">ログアウト</a>
             </li>
           </ul>
         </div>
@@ -175,6 +175,24 @@ if ($_POST["Keep_Flag"] == 1) {
     </div>
   </div>
 
+  <div class="modal" id="logoutModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>ログアウトしますか？</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" onclick="logout()">はい</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">いいえ</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </body>
 

@@ -1,6 +1,10 @@
 <?php
 require_once("config.php");
-$errorMessage = null;
+$Message = null;
+function h($str)
+{
+    return htmlspecialchars($str, ENT_QUOTES, "UTF-8");
+};
 
 if (isset($_POST["login"])) {
     $UserName = $_POST["UserName"];
@@ -12,18 +16,17 @@ if (isset($_POST["login"])) {
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         $password = $_POST["password"];
 
-        if (password_verify($password, $row["UserPassword"])) {
+        if ($UserName = $row["UserName"] && password_verify($password, $row["UserPassword"])) {
             session_start();
             $_SESSION["Name"] = $row["UserName"];
             $_SESSION["ID"] = $row["UserId"];
             header("Location: main.php");
             exit();
         } else {
-            $errorMessage = "ぱすわーどえらー";
+            $Message = "ユーザー名またはパスワードが間違っています";
         }
     } catch (PDOException $e) {
-        $errorMessage = "データベースエラー";
-        echo htmlspecialchars($e->getmessage(), ENT_QUOTES);
+        $Message = "サーバーエラー";
         exit();
     }
 }
@@ -46,9 +49,12 @@ if (isset($_POST["signup"])) {
 
 <body>
 
-    <?php echo htmlspecialchars($errorMessage, ENT_QUOTES); ?>
+    <?php if (isset($Message)) {
+        echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . h($Message) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
+    } ?>
 
-    <div class="container-fluid bg-light mx-auto" style="width:100%; height:100%;">
+
+    <div class="container-fluid bg-light" style="height:100%;">
         <div class="d-flex align-items-center justify-content-center" style="height:100%">
             <div class="border border-info rounded p-4">
                 <div class="d-flex justify-content-center m-4">
@@ -77,6 +83,5 @@ if (isset($_POST["signup"])) {
         </div>
     </div>
 </body>
-
 
 </html>

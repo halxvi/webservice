@@ -1,5 +1,9 @@
 <?php
 require_once("config.php");
+function h($str)
+{
+    return htmlspecialchars($str, ENT_QUOTES, "UTF-8");
+};
 $errorMessage = null;
 $signupMessage = null;
 
@@ -14,7 +18,7 @@ if (isset($_POST["signup"])) {
         $signupMessage = "登録が完了しました";
     } catch (PDOException $e) {
         $errorMessage = "データベースエラー";
-        echo $e->getmessage();
+        echo h($e->getmessage());
     }
 }
 if (isset($_POST["get_back"])) {
@@ -23,19 +27,21 @@ if (isset($_POST["get_back"])) {
 }
 ?>
 
-<html>
+<html lang="ja">
 
 <head>
     <title>サインアップ</title>
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<script src="js/signup.js"></script>
 
 <body>
     <?php if (isset($signupMessage)) {
-        echo "<div class='alert alert-primary' role='alert'>" . $signupMessage . "</div>";
+        echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . h($signupMessage) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
     } ?>
 
     <?php echo htmlspecialchars($errorMessage, ENT_QUOTES); ?>
@@ -50,21 +56,21 @@ if (isset($_POST["get_back"])) {
                     <div class="d-flex justify-content-center m-3">
                         <div class="form-group">
                             <label class="font-weight-bold">ユーザー名</label>
-                            <input type="text" id="UserName" class="border border-secondary rounded" name="UserName" maxlength="10">
-                            <small class="form-text font-weight-light text-muted">[10文字以内]</small>
+                            <input type="text" id="UserName" class="border border-secondary rounded" name="UserName">
+                            <small class="form-text font-weight-light text-muted">英数字4字以上・10字以内</small>
                         </div>
                     </div>
                     <div class="d-flex justify-content-center m-3">
                         <div class="form-group">
                             <label class="font-weight-bold">パスワード</label>
-                            <input type="password" id="password" class="border border-secondary rounded" name="password" minlength="8">
-                            <small class="form-text font-weight-light text-muted">[8文字以上]</small>
+                            <input type="password" id="password" class="border border-secondary rounded" name="password">
+                            <small class="form-text font-weight-light text-muted">英数字8字以上・16字以内</small>
                         </div>
                     </div>
                     <div class="d-flex justify-content-center m-3">
                         <div class="form-group">
                             <input type="submit" name="signup" class="btn btn-info m-3" value="登録">
-                            <input type="submit" name="get_back" class="btn btn-outline-info m-3" value=" 戻る">
+                            <input type="submit" id="get_back" name="get_back" class="btn btn-outline-info m-3" value="戻る">
                         </div>
                     </div>
                 </form>

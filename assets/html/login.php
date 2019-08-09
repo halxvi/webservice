@@ -1,6 +1,6 @@
 <?php
 require_once("config.php");
-$Message = null;
+$userMessage = null;
 function h($str)
 {
     return htmlspecialchars($str, ENT_QUOTES, "UTF-8");
@@ -23,11 +23,10 @@ if (isset($_POST["login"])) {
             header("Location: main.php");
             exit();
         } else {
-            $Message = "ユーザー名またはパスワードが間違っています";
+            $userMessage = "ユーザー名またはパスワードが間違っています";
         }
     } catch (PDOException $e) {
-        $Message = "サーバーエラー";
-        exit();
+        $userMessage = "サーバーエラー";
     }
 }
 if (isset($_POST["signup"])) {
@@ -49,8 +48,8 @@ if (isset($_POST["signup"])) {
 
 <body>
 
-    <?php if (isset($Message)) {
-        echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . h($Message) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
+    <?php if (isset($userMessage)) {
+        echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . h($userMessage) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
     } ?>
 
 

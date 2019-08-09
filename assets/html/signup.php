@@ -4,21 +4,36 @@ function h($str)
 {
     return htmlspecialchars($str, ENT_QUOTES, "UTF-8");
 };
-$errorMessage = null;
+function numalphabetchecker($str)
+{
+    $match = preg_match('/^[a-zA-Z0-9]+$/', $str);
+    return  $match == 1  ? true : false;
+}
+function strlengthchecker($str, $min, $max)
+{
+    $str =  iconv_strlen($str);
+    return ($str >= $min) and $str <= $max  ? true : false;
+}
 $signupMessage = null;
 
 if (isset($_POST["signup"])) {
-    $UserName = $_POST["UserName"];
-    $Password = Password_hash($_POST["password"], PASSWORD_DEFAULT);
-    $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', dbhostname, dbname);
-    try {
-        $pdo = new PDO($dsn, dbusername, dbpassword, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
-        $stmt = $pdo->prepare('INSERT INTO Users(UserName,UserPassword) VALUE(?,?)');
-        $stmt->execute(array($UserName, $Password));
-        $signupMessage = "登録が完了しました";
-    } catch (PDOException $e) {
-        $errorMessage = "データベースエラー";
-        echo h($e->getmessage());
+    numalphabetchecker($_POST['UserName']) && strlengthchecker($_POST['UserName'], 4, 10) ? $UserName = $_POST['UserName'] : $UserName = false;
+    numalphabetchecker($_POST['password']) && strlengthchecker($_POST['password'], 8, 16) ? $Password = Password_hash($_POST["password"], PASSWORD_DEFAULT) : $Password = false;
+
+    if ($UserName && $Password) {
+        try {
+            $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', dbhostname, dbname);
+            $pdo = new PDO($dsn, dbusername, dbpassword, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+            $stmt = $pdo->prepare('INSERT INTO Users(UserName,UserPassword) VALUE(?,?)');
+            $stmt->execute(array($UserName, $Password));
+            $signupMessage = "登録が完了しました";
+        } catch (PDOException $e) {
+            $message = preg_match('/Duplicate/', $e->getmessage());
+            $message == 1 ? $signupMessage = "ユーザー名が既に存在します　別のユーザー名にして下さい" : false;
+            echo $e->getmessage();
+        }
+    } else {
+        $signupMessage = "ユーザー名もしくはパスワードが正しく入力されていません";
     }
 }
 if (isset($_POST["get_back"])) {
@@ -37,7 +52,6 @@ if (isset($_POST["get_back"])) {
 </head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-<script src="js/signup.js"></script>
 
 <body>
     <?php if (isset($signupMessage)) {

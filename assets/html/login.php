@@ -9,7 +9,7 @@ class LoginController
         return htmlspecialchars($str, ENT_QUOTES, "UTF-8");
     }
 
-    function login()
+    function Login()
     {
         $UserName = null;
         $Password = null;
@@ -35,7 +35,7 @@ class LoginController
             $this->UserMessage = "サーバーエラー" . $e;
         }
     }
-    function signup()
+    function Signup()
     {
         header("Location: signup.php");
         exit();
@@ -43,11 +43,11 @@ class LoginController
 }
 
 $Login = new LoginController();
-if (isset($_POST["login"])) {
-    $Login->login();
+if (isset($_POST["Login"])) {
+    $Login->Login();
 }
-if (isset($_POST["signup"])) {
-    $Login->signup();
+if (isset($_POST["Signup"])) {
+    $Login->Signup();
 }
 ?>
 
@@ -90,8 +90,8 @@ if (isset($_POST["signup"])) {
                     </div>
                     <div class="d-flex justify-content-center m-3">
                         <div class="form-group">
-                            <input type="submit" name="login" class="btn btn-info m-3" value="ログイン">
-                            <input type="submit" name="signup" class="btn btn-outline-info m-3" value="サインアップ">
+                            <input type="submit" name="Login" class="btn btn-info m-3" value="ログイン">
+                            <input type="submit" name="Signup" class="btn btn-outline-info m-3" value="サインアップ">
                         </div>
                     </div>
             </div>

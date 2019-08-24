@@ -1,37 +1,53 @@
 <?php
 require_once("config.php");
-$userMessage = null;
-function h($str)
+class LoginController
 {
-    return htmlspecialchars($str, ENT_QUOTES, "UTF-8");
-};
+    public $UserMessage = null;
 
-if (isset($_POST["login"])) {
-    $UserName = $_POST["UserName"];
-    $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', dbhostname, dbname);
-    try {
-        $pdo = new PDO($dsn, dbusername, dbusername, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
-        $stmt = $pdo->prepare('SELECT * FROM Users WHERE UserName = ?');
-        $stmt->execute(array($UserName));
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        $password = $_POST["password"];
+    function h($str)
+    {
+        return htmlspecialchars($str, ENT_QUOTES, "UTF-8");
+    }
 
-        if ($UserName = $row["UserName"] && password_verify($password, $row["UserPassword"])) {
-            session_start();
-            $_SESSION["Name"] = $row["UserName"];
-            $_SESSION["ID"] = $row["UserId"];
-            header("Location: main.php");
-            exit();
-        } else {
-            $userMessage = "ユーザー名またはパスワードが間違っています";
+    function login()
+    {
+        $UserName = null;
+        $Password = null;
+        $UserName = $_POST["UserName"];
+        $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', dbhostname, dbname);
+        try {
+            $pdo = new PDO($dsn, dbusername, dbusername, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+            $stmt = $pdo->prepare('SELECT * FROM Users WHERE UserName = ?');
+            $stmt->execute(array($UserName));
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $Password = $_POST["Password"];
+
+            if ($UserName = $row["UserName"] && password_verify($Password, $row["UserPassword"])) {
+                session_start();
+                $_SESSION["Name"] = $row["UserName"];
+                $_SESSION["ID"] = $row["UserId"];
+                header("Location: main.php");
+                exit();
+            } else {
+                $this->UserMessage = "ユーザー名またはパスワードが間違っています";
+            }
+        } catch (PDOException $e) {
+            $this->UserMessage = "サーバーエラー" . $e;
         }
-    } catch (PDOException $e) {
-        $userMessage = "サーバーエラー" . $e;
+    }
+    function signup()
+    {
+        header("Location: signup.php");
+        exit();
     }
 }
+
+$Login = new LoginController();
+if (isset($_POST["login"])) {
+    $Login->login();
+}
 if (isset($_POST["signup"])) {
-    header("Location: signup.php");
-    exit();
+    $Login->signup();
 }
 ?>
 
@@ -48,8 +64,8 @@ if (isset($_POST["signup"])) {
 
 <body>
 
-    <?php if (isset($userMessage)) {
-        echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . h($userMessage) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
+    <?php if (isset($Login->UserMessage)) {
+        echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . $Login->h($Login->UserMessage) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
     } ?>
 
 
@@ -59,7 +75,7 @@ if (isset($_POST["signup"])) {
                 <div class="d-flex justify-content-center m-4">
                     <h3>ログイン<h3>
                 </div>
-                <form id="loginForm" method="POST">
+                <form id="LoginForm" method="POST">
                     <div class="d-flex justify-content-center m-3">
                         <div class="form-group">
                             <label class="font-weight-bold">ユーザー名</label>
@@ -69,7 +85,7 @@ if (isset($_POST["signup"])) {
                     <div class="d-flex justify-content-center m-3">
                         <div class="form-group">
                             <label class="font-weight-bold">パスワード</label>
-                            <input type="password" id="password" class="border border-secondary rounded" name="password">
+                            <input type="Password" id="Password" class="border border-secondary rounded" name="Password">
                         </div>
                     </div>
                     <div class="d-flex justify-content-center m-3">

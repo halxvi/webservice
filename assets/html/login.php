@@ -4,24 +4,23 @@ class LoginController
 {
     public $UserMessage = null;
 
-    function h($str)
+    function hsc($str)
     {
-        return htmlspecialchars($str, ENT_QUOTES, "UTF-8");
+        return htmlspecialchars($str, ENT_QUOTES, "UTF-8", false);
     }
 
     function Login()
     {
         $UserName = null;
         $Password = null;
-        $UserName = $_POST["UserName"];
+        $UserName = filter_input(INPUT_POST, "UserName");
         $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', dbhostname, dbname);
         try {
             $pdo = new PDO($dsn, dbusername, dbusername, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
             $stmt = $pdo->prepare('SELECT * FROM Users WHERE UserName = ?');
             $stmt->execute(array($UserName));
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            $Password = $_POST["Password"];
-
+            $Password = filter_input(INPUT_POST, "Password");
             if ($UserName = $row["UserName"] && password_verify($Password, $row["UserPassword"])) {
                 session_start();
                 $_SESSION["Name"] = $row["UserName"];
@@ -32,7 +31,7 @@ class LoginController
                 $this->UserMessage = "ユーザー名またはパスワードが間違っています";
             }
         } catch (PDOException $e) {
-            $this->UserMessage = "サーバーエラー" . $e;
+            $this->UserMessage = "サーバーエラー";
         }
     }
     function Signup()
@@ -65,7 +64,7 @@ if (isset($_POST["Signup"])) {
 <body>
 
     <?php if (isset($Login->UserMessage)) {
-        echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . $Login->h($Login->UserMessage) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
+        echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . $Login->hsc($Login->UserMessage) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
     } ?>
 
 

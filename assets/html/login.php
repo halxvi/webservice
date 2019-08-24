@@ -1,5 +1,6 @@
 <?php
 require_once("config.php");
+
 class LoginController
 {
     public $UserMessage = null;
@@ -11,8 +12,6 @@ class LoginController
 
     function Login()
     {
-        $UserName = null;
-        $Password = null;
         $UserName = filter_input(INPUT_POST, "UserName");
         $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', dbhostname, dbname);
         try {
@@ -42,9 +41,11 @@ class LoginController
 }
 
 $Login = new LoginController();
+
 if (isset($_POST["Login"])) {
     $Login->Login();
 }
+
 if (isset($_POST["Signup"])) {
     $Login->Signup();
 }

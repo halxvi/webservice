@@ -1,44 +1,66 @@
 <?php
 require_once("config.php");
-function h($str)
-{
-    return htmlspecialchars($str, ENT_QUOTES, "UTF-8");
-}
-function numalphabetchecker($str)
-{
-    $match = preg_match('/^[a-zA-Z0-9]+$/', $str);
-    return  $match == 1  ? true : false;
-}
-function strlengthchecker($str, $min, $max)
-{
-    $str =  iconv_strlen($str);
-    return ($str >= $min) and $str <= $max  ? true : false;
-}
-$signupMessage = null;
 
-if (isset($_POST["signup"])) {
-    numalphabetchecker($_POST['UserName']) && strlengthchecker($_POST['UserName'], 4, 10) ? $UserName = $_POST['UserName'] : $UserName = false;
-    numalphabetchecker($_POST['password']) && strlengthchecker($_POST['password'], 8, 16) ? $Password = Password_hash($_POST["password"], PASSWORD_DEFAULT) : $Password = false;
+class SignupController
+{
+    public $signupMessage = null;
 
-    if ($UserName && $Password) {
-        try {
-            $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', dbhostname, dbname);
-            $pdo = new PDO($dsn, dbusername, dbpassword, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
-            $stmt = $pdo->prepare('INSERT INTO Users(UserName,UserPassword) VALUE(?,?)');
-            $stmt->execute(array($UserName, $Password));
-            $signupMessage = "登録が完了しました";
-        } catch (PDOException $e) {
-            $message = preg_match('/Duplicate/', $e->getmessage());
-            $message == 1 ? $signupMessage = "ユーザー名が既に存在します　別のユーザー名にして下さい" : false;
-            echo $e->getmessage();
+    function hsc($str)
+    {
+        return htmlspecialchars($str, ENT_QUOTES, "UTF-8", false);
+    }
+
+    function numalphabetchecker($str)
+    {
+        $match = preg_match('/^[a-zA-Z0-9]+$/', $str);
+        return  $match === 1  ? true : false;
+    }
+
+    function strlengthchecker($str, $min, $max)
+    {
+        $str =  iconv_strlen($str);
+        return ($str >= $min) and $str <= $max  ? true : false;
+    }
+
+    function signup()
+    {
+        $UserName = filter_input(INPUT_POST, 'UserName');
+        $Password = filter_input(INPUT_POST, 'Password');
+        $this->numalphabetchecker($UserName) && $this->strlengthchecker($UserName, 4, 10) ? $UserName = $UserName : $UserName = false;
+        $this->numalphabetchecker($Password) && $this->strlengthchecker($Password, 8, 16) ? $Password = password_hash($Password, PASSWORD_DEFAULT) : $Password = false;
+
+
+        if ($UserName && $Password) {
+            try {
+                $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', dbhostname, dbname);
+                $pdo = new PDO($dsn, dbusername, dbpassword, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+                $stmt = $pdo->prepare('INSERT INTO Users(UserName,UserPassword) VALUE(?,?)');
+                $stmt->execute(array($UserName, $Password));
+                $this->signupMessage = "登録が完了しました";
+            } catch (PDOException $e) {
+                $message = preg_match('/Duplicate/', $e->getmessage());
+                $message === 1 ? $this->signupMessage = "ユーザー名が既に存在します　別のユーザー名にして下さい" : false;
+            }
+        } else {
+            $this->signupMessage = "ユーザー名もしくはパスワードが正しく入力されていません";
         }
-    } else {
-        $signupMessage = "ユーザー名もしくはパスワードが正しく入力されていません";
+    }
+
+    function getBack()
+    {
+        header("Location: login.php");
+        exit();
     }
 }
+
+$signup = new SignupController();
+
+if (isset($_POST["signup"])) {
+    $signup->signup();
+}
+
 if (isset($_POST["get_back"])) {
-    header("Location: login.php");
-    exit();
+    $signup->getBack();
 }
 ?>
 
@@ -54,8 +76,8 @@ if (isset($_POST["get_back"])) {
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
 <body>
-    <?php if (isset($signupMessage)) {
-        echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . h($signupMessage) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
+    <?php if (isset($signup->signupMessage)) {
+        echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . $signup->hsc($signup->signupMessage) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
     } ?>
 
     <div class="container-fluid bg-light mx-auto" style="width:100%; height:100%;">
@@ -64,7 +86,7 @@ if (isset($_POST["get_back"])) {
                 <div class="d-flex justify-content-center m-4">
                     <h3>サインアップ</h3>
                 </div>
-                <form id="signupForm" method="POST">
+                <form id="SignupForm" method="POST">
                     <div class="d-flex justify-content-center m-3">
                         <div class="form-group">
                             <label class="font-weight-bold">ユーザー名</label>
@@ -75,7 +97,7 @@ if (isset($_POST["get_back"])) {
                     <div class="d-flex justify-content-center m-3">
                         <div class="form-group">
                             <label class="font-weight-bold">パスワード</label>
-                            <input type="password" id="password" class="border border-secondary rounded" name="password">
+                            <input type="Password" id="Password" class="border border-secondary rounded" name="Password">
                             <small class="form-text font-weight-light text-muted">英数字8字以上・16字以内</small>
                         </div>
                     </div>

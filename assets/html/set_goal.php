@@ -6,9 +6,9 @@ $db["pass"] = "root";
 $db["dbname"] = "my_system";
 
 session_start();
-$_SESSION["errorMessage"] = null;
-$_SESSION["userMessage"] = null;
-$_SESSION["Task_Delete_Message"] = null;
+$ErrorMessage = null;
+$UserMessage = null;
+$TaskDeleteMessage = null;
 
 $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $db['host'], $db['dbname']);
 $pdo = new PDO($dsn, $db['user'], $db['pass'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
@@ -26,17 +26,17 @@ if (isset($_POST["send_data"])) {
     if ($Recode_Check[0] == 0) {
       $stmt = $pdo->prepare("INSERT INTO Tasks(TaskUserId, Goal, Task,Way, Period, StartDate, EndDate) value(?,?,?,?,?,?,?)");
       $stmt->execute(array($_SESSION["ID"], $_POST["object"], $_POST["quantitiy"], $_POST["way"], $_POST["term"], $StartDate, $EndDate));
-      $_SESSION["userMessage"] = "登録しました！";
+      $UserMessage = "登録しました！";
     } else {
-      $_SESSION["userMessage"] = "既に目標があります";
+      $UserMessage = "既に目標があります";
     }
   } catch (PDOException $e) {
-    $errorMessage = $e->getmessage();
-    echo htmlspecialchars($errorMessage, ENT_QUOTES);
+    $ErrorMessage = $e->getmessage();
+    echo htmlspecialchars($ErrorMessage, ENT_QUOTES);
   }
 }
 if (isset($_POST["task_delete_opt"])) {
-  $_SESSION["Task_Delete_Message"] = "目標を削除しますか？";
+  $TaskDeleteMessage = "目標を削除しますか？";
 }
 if ($_POST["Task_Delete_Flag"] == 1) {
   $stmt = $pdo->prepare("UPDATE Tasks SET EndFlag = 1 WHERE EndFlag = 0 AND TaskUserId = ? ");
@@ -53,14 +53,15 @@ if ($_POST["Task_Delete_Flag"] == 1) {
 </head>
 <script src="vendor/jquery/jquery.min.js"></script>
 <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="js/main.js"></script>
 
 <body>
-  <?php if (isset($_SESSION["userMessage"])) {
-    echo "<div class='alert alert-primary' role='alert'>" . $_SESSION["userMessage"] . "</div>";
+  <?php if (isset($UserMessage)) {
+    echo "<div class='alert alert-primary' role='alert'>" . $UserMessage . "</div>";
   } ?>
-  <?php if (isset($_SESSION["Task_Delete_Message"])) {
+  <?php if (isset($TaskDeleteMessage)) {
     echo "<script>
-        var result = window.confirm('" . $_SESSION["Task_Delete_Message"] . "');
+        var result = window.confirm('" . $TaskDeleteMessage . "');
         if(result){
           $.post('set_goal.php',
           {Task_Delete_Flag: 1},
@@ -91,7 +92,7 @@ if ($_POST["Task_Delete_Flag"] == 1) {
               <a class="nav-link" href="set_goal.php">目標作成</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="logout.php">ログアウト</a>
+              <a class="nav-link" data-toggle="modal" data-target="#logoutModal">ログアウト</a>
             </li>
           </ul>
         </div>
@@ -113,6 +114,25 @@ if ($_POST["Task_Delete_Flag"] == 1) {
         <form method="POST">
           <input type="submit" name="task_delete_opt" class="btn btn-primary" value="現在の目標を削除する">
         </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="logoutModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>ログアウトしますか？</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" onclick="logout()">はい</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">いいえ</button>
+        </div>
       </div>
     </div>
   </div>

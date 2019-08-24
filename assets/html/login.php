@@ -26,7 +26,7 @@ if (isset($_POST["login"])) {
             $userMessage = "ユーザー名またはパスワードが間違っています";
         }
     } catch (PDOException $e) {
-        $userMessage = "サーバーエラー";
+        $userMessage = "サーバーエラー" . $e;
     }
 }
 if (isset($_POST["signup"])) {

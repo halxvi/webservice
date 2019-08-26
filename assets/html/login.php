@@ -5,11 +5,6 @@ class LoginController
 {
     private $UserMessage = null;
 
-    function hsc($str)
-    {
-        return htmlspecialchars($str, ENT_QUOTES, "UTF-8", false);
-    }
-
     function Login()
     {
         $UserName = filter_input(INPUT_POST, "UserName");
@@ -33,20 +28,31 @@ class LoginController
             $this->UserMessage = "サーバーエラー";
         }
     }
+
     function Signup()
     {
         header("Location: signup.php");
         exit();
     }
+
+    function getUserMessage()
+    {
+        return $this->UserMessage;
+    }
+
+    function hsc($str)
+    {
+        return htmlspecialchars($str, ENT_QUOTES, "UTF-8", false);
+    }
 }
 
 $Login = new LoginController();
 
-if (isset($_POST["Login"])) {
+if (filter_input(INPUT_POST, "Login")) {
     $Login->Login();
 }
 
-if (isset($_POST["Signup"])) {
+if (filter_input(INPUT_POST, "goSignup")) {
     $Login->Signup();
 }
 ?>
@@ -64,8 +70,8 @@ if (isset($_POST["Signup"])) {
 
 <body>
 
-    <?php if (isset($Login->UserMessage)) {
-        echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . $Login->hsc($Login->UserMessage) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
+    <?php if ($Login->getUserMessage()) {
+        echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . $Login->hsc($Login->getUserMessage()) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
     } ?>
 
 
@@ -91,7 +97,7 @@ if (isset($_POST["Signup"])) {
                     <div class="d-flex justify-content-center m-3">
                         <div class="form-group">
                             <input type="submit" name="Login" class="btn btn-info m-3" value="ログイン">
-                            <input type="submit" name="Signup" class="btn btn-outline-info m-3" value="サインアップ">
+                            <input type="submit" name="goSignup" class="btn btn-outline-info m-3" value="サインアップ">
                         </div>
                     </div>
             </div>

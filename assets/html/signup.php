@@ -3,20 +3,15 @@ require_once("config.php");
 
 class SignupController
 {
-    public $UserMessage = null;
+    private $UserMessage = null;
 
-    function hsc($str)
-    {
-        return htmlspecialchars($str, ENT_QUOTES, "UTF-8", false);
-    }
-
-    function numalphabetchecker($str)
+    private function numalphabetchecker($str)
     {
         $match = preg_match('/^[a-zA-Z0-9]+$/', $str);
         return  $match === 1  ? true : false;
     }
 
-    function strlengthchecker($str, $min, $max)
+    private function strlengthchecker($str, $min, $max)
     {
         $str =  iconv_strlen($str);
         return ($str >= $min) and $str <= $max  ? true : false;
@@ -49,15 +44,25 @@ class SignupController
         header("Location: login.php");
         exit();
     }
+
+    function getUserMessage()
+    {
+        return $this->UserMessage;
+    }
+
+    function hsc($str)
+    {
+        return htmlspecialchars($str, ENT_QUOTES, "UTF-8", false);
+    }
 }
 
 $signup = new SignupController();
 
-if (isset($_POST["signup"])) {
+if (filter_input(INPUT_POST, "Signup")) {
     $signup->signup();
 }
 
-if (isset($_POST["get_back"])) {
+if (filter_input(INPUT_POST, "getBack")) {
     $signup->getBack();
 }
 ?>
@@ -74,8 +79,8 @@ if (isset($_POST["get_back"])) {
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
 <body>
-    <?php if (isset($signup->UserMessage)) {
-        echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . $signup->hsc($signup->UserMessage) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
+    <?php if ($signup->getUserMessage()) {
+        echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . $signup->hsc($signup->getUserMessage()) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
     } ?>
 
     <div class="container-fluid bg-light mx-auto" style="width:100%; height:100%;">
@@ -101,8 +106,8 @@ if (isset($_POST["get_back"])) {
                     </div>
                     <div class="d-flex justify-content-center m-3">
                         <div class="form-group">
-                            <input type="submit" name="signup" class="btn btn-info m-3" value="登録">
-                            <input type="submit" id="get_back" name="get_back" class="btn btn-outline-info m-3" value="戻る">
+                            <input type="submit" name="Signup" class="btn btn-info m-3" value="登録">
+                            <input type="submit" id="getBack" name="getBack" class="btn btn-outline-info m-3" value="戻る">
                         </div>
                     </div>
                 </form>

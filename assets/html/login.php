@@ -3,7 +3,7 @@ require_once("config.php");
 
 class LoginController
 {
-    public $UserMessage = null;
+    private $UserMessage = null;
 
     function hsc($str)
     {
@@ -14,8 +14,8 @@ class LoginController
     {
         $UserName = filter_input(INPUT_POST, "UserName");
         $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', dbhostname, dbname);
+        $pdo = new PDO($dsn, dbusername, dbusername, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
         try {
-            $pdo = new PDO($dsn, dbusername, dbusername, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
             $stmt = $pdo->prepare('SELECT * FROM Users WHERE UserName = ?');
             $stmt->execute(array($UserName));
             $row = $stmt->fetch(PDO::FETCH_ASSOC);

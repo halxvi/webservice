@@ -3,7 +3,7 @@ require_once("config.php");
 
 class SignupController
 {
-    public $signupMessage = null;
+    public $UserMessage = null;
 
     function hsc($str)
     {
@@ -28,21 +28,19 @@ class SignupController
         $Password = filter_input(INPUT_POST, 'Password');
         $this->numalphabetchecker($UserName) && $this->strlengthchecker($UserName, 4, 10) ? $UserName = $UserName : $UserName = false;
         $this->numalphabetchecker($Password) && $this->strlengthchecker($Password, 8, 16) ? $Password = password_hash($Password, PASSWORD_DEFAULT) : $Password = false;
-
-
         if ($UserName && $Password) {
             try {
                 $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', dbhostname, dbname);
                 $pdo = new PDO($dsn, dbusername, dbpassword, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
                 $stmt = $pdo->prepare('INSERT INTO Users(UserName,UserPassword) VALUE(?,?)');
                 $stmt->execute(array($UserName, $Password));
-                $this->signupMessage = "登録が完了しました";
+                $this->UserMessage = "登録が完了しました";
             } catch (PDOException $e) {
-                $message = preg_match('/Duplicate/', $e->getmessage());
-                $message === 1 ? $this->signupMessage = "ユーザー名が既に存在します　別のユーザー名にして下さい" : false;
+                $messageflag = preg_match('/Duplicate/', $e->getmessage());
+                $messageflag === 1 ? $this->UserMessage = "ユーザー名が既に存在します　別のユーザー名にして下さい" : false;
             }
         } else {
-            $this->signupMessage = "ユーザー名もしくはパスワードが正しく入力されていません";
+            $this->UserMessage = "ユーザー名もしくはパスワードが正しく入力されていません";
         }
     }
 
@@ -76,8 +74,8 @@ if (isset($_POST["get_back"])) {
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
 <body>
-    <?php if (isset($signup->signupMessage)) {
-        echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . $signup->hsc($signup->signupMessage) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
+    <?php if (isset($signup->UserMessage)) {
+        echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . $signup->hsc($signup->UserMessage) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
     } ?>
 
     <div class="container-fluid bg-light mx-auto" style="width:100%; height:100%;">

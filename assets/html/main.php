@@ -1,108 +1,104 @@
 <?php
 require_once("config.php");
+
+session_start();
+
 class DBContoller
 {
-  private $host = dbhostname;
-  private $user = dbusername;
-  private $pass = dbpassword;
-  private $dbname = dbname;
+  public $UserMessage = null;
+  public $task = null;
+  public $Goal = null;
+  public $days = null;
+  public $alertMessage = null;
+  public $DateNow = null;
+  public $koushin = null;
+  public $DateOut = null;
+  public $dsn = null;
+  public $pdo = null;
+  public $row = null;
 
-  function getDBHost()
+  function hsc($str)
   {
-    return $this->host;
+    return htmlspecialchars($str, ENT_QUOTES, "UTF-8", false);
   }
-  function getDBUser()
-  {
-    return $this->user;
-  }
-  function getDBPass()
-  {
-    return $this->pass;
-  }
-  function getDBName()
-  {
-    return $this->dbname;
-  }
-}
 
-function h($str)
-{
-  return htmlspecialchars($str, ENT_QUOTES, "UTF-8");
+  function __construct()
+  {
+    $this->dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', dbhostname, dbname);
+    $this->pdo = new PDO($this->dsn, dbusername, dbpassword, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+    try {
+      $stmt = $this->pdo->prepare("SELECT * FROM Users,Tasks WHERE UserId = ? AND Users.UserId = Tasks.TaskUserId AND Tasks.EndFlag =0");
+      $stmt->execute(array($_SESSION["ID"]));
+      $this->row = $stmt->fetch(PDO::FETCH_ASSOC);
+      $DateNow = (int) date("Ymd");
+      $this->koushin = $DateNow + 1 - $this->row["TaskCounter"] - $this->row["StartDate"];
+      $this->DateOut = $DateNow - $this->row["EndDate"];
+      if (isset($this->row["Goal"])) {
+        $this->Goal = sprintf("現在の目標は%sです", $this->row["Goal"]);
+        $this->days = sprintf("%s日継続中です", $this->row["TaskCounter"]);
+      } else {
+        $this->UserMessage = sprintf("ようこそ%sさん\n目標を作りましょう", $_SESSION["Name"]);
+      }
+      if (isset($this->row["Task"])) {
+        preg_match("/[0-9０－９]+/", $this->row["Task"], $today_task_num);
+        preg_match_all("/[^0-9]+/", $this->row["Task"], $today_task_stmt, PREG_SET_ORDER);
+        $today_task_num[0] = ceil((int) $today_task_num[0] / (int) $this->row["Period"]);
+        $this->tasks = sprintf("やるべきこと：%s", $today_task_stmt[0][0] . $today_task_num[0] . $today_task_stmt[1][0]);
+      }
+    } catch (PDOException $e) {
+      $this->UserMessage = $e->getmessage();
+    }
+  }
+
+  function endTask()
+  {
+    if ($this->DateOut > 1) {
+      $this->UserMessage = "目標達成予定日を過ぎてしまいました 新しい目標を設定してください";
+      $_POST["Delete_Flag"] = 1;
+    }
+    if ($this->koushin > 1) {
+      try {
+        $AddCounter = $this->koushin;
+        $stmt = $this->pdo->prepare("UPDATE Tasks SET TaskCounter =? WHERE EndFlag =0");
+        $stmt->execute(array($AddCounter));
+        $this->UserMessage = "予定より" . $this->koushin . "日遅れています";
+      } catch (PDOException $e) {
+        $this->UserMessage = $e->getmessage();
+      }
+    } elseif ($this->koushin == 1) {
+      try {
+        $AddCounter = $this->koushin;
+        $stmt = $this->pdo->prepare("UPDATE Tasks SET TaskCounter =? WHERE EndFlag =0");
+        $stmt->execute(array($AddCounter));
+        $this->UserMessage = "今日もお疲れ様です！";
+      } catch (PDOException $e) {
+        $this->UserMessage = $e->getmessage();
+      }
+    } elseif ($this->koushin == 0) {
+      $this->UserMessage = "今日の分は終わっています";
+    }
+  }
+
+  function checkGoal()
+  {
+    try {
+      $stmt = $this->pdo->prepare("UPDATE Tasks SET EndFlag = 1 WHERE EndFlag = 0 AND TaskUserId = ?");
+      $stmt->execute(array($_SESSION["ID"]));
+      $this->UserMessage = "おめでとうございます！目標を達成しました！";
+    } catch (PDOException $e) {
+      $this->UserMessage = $e->getmessage();
+    }
+  }
 }
 
 $db = new DBContoller();
-$dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $db->getDBHost(), $db->getDBName());
-$pdo = new PDO($dsn, $db->getDBUser(), $db->getDBPass(), array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
-session_start();
-$userMessage = null;
-$tasks = null;
-$alertMessage = null;
-
-try {
-  $stmt = $pdo->prepare("SELECT * FROM Users,Tasks WHERE UserId = ? AND Users.UserId = Tasks.TaskUserId AND Tasks.EndFlag =0");
-  $stmt->execute(array($_SESSION["ID"]));
-  $row = $stmt->fetch(PDO::FETCH_ASSOC);
-  if (isset($row["Goal"])) {
-    $userMessage = sprintf("現在の目標は%sです\n", $row["Goal"]);
-  } else {
-    $userMessage = sprintf("ようこそ%sさん\n目標を作りましょう", $_SESSION["Name"]);
-  }
-  if (isset($row["Task"])) {
-    preg_match("/[0-9０－９]+/", $row["Task"], $today_task_num);
-    preg_match_all("/[^0-9]+/", $row["Task"], $today_task_stmt, PREG_SET_ORDER);
-    $today_task_num[0] = ceil($today_task_num[0] / $row["Period"]);
-    $tasks = sprintf("やるべきこと：%s", $today_task_stmt[0][0] . $today_task_num[0] . $today_task_stmt[1][0]);
-  }
-} catch (PDOException $e) {
-  $userMessage = $e->getmessage();
+if (isset($db->row["TaskNo"])) {
+  filter_input(INPUT_POST, "endTask") ? $db->endTask() : false;
 }
 
-$DateNow = (int) date("Ymd");
-$koushin = $DateNow + 1 - $row["TaskCounter"] - $row["StartDate"];
-$DateOut = $DateNow - $row["EndDate"];
-
-echo $kousin;
-
-if (isset($_POST["endTask"]) && isset($row["TaskNo"])) {
-  if ($DateOut > 1) {
-    $userMessage = "目標達成予定日を過ぎてしまいました 新しい目標を設定してください";
-    $_POST["Delete_Flag"] = 1;
-  }
-  if ($koushin > 1) {
-    $alertMessage = "予定より" . $koushin . "日遅れています　継続しますか？";
-  } elseif ($koushin == 1) {
-    try {
-      $AddCounter = $koushin;
-      $stmt = $pdo->prepare("UPDATE Tasks SET TaskCounter =? WHERE EndFlag =0");
-      $stmt->execute(array($AddCounter));
-      $userMessage = "今日もお疲れ様です！";
-    } catch (PDOException $e) {
-      $userMessage = $e->getmessage();
-    }
-  } elseif ($koushin == 0) {
-    $userMessage = "今日の分は終わっています";
-  }
-}
-
-if ($row["TaskCounter"] == $row["Period"] && $koushin == 0) {
-  $userMessage = "おめでとうございます！目標を達成しました！";
-  $stmt = $pdo->prepare("UPDATE Tasks SET EndFlag = 1 WHERE EndFlag = 0 AND TaskUserId = ?");
-  $stmt->execute(array($_SESSION["ID"]));
-}
-
-if ($_POST["Delete_Flag"] == 1) {
-  $stmt = $pdo->prepare("UPDATE Tasks SET EndFlag = 1 WHERE EndFlag = 0 AND TaskUserId = ?");
-  $stmt->execute(array($_SESSION["ID"]));
-}
-if ($_POST["Keep_Flag"] == 1) {
-  try {
-    $AddCounter = $koushin - 1;
-    $stmt = $pdo->prepare("UPDATE Tasks SET TaskCounter =? WHERE EndFlag =0");
-    $stmt->execute(array($AddCounter));
-  } catch (PDOException $e) {
-    $userMessage = $e->getmessage();
-  }
+if ($db->row["TaskCounter"] == $db->row["Period"] && $db->koushin == 0) {
+  $db->checkGoal();
 }
 ?>
 
@@ -119,14 +115,13 @@ if ($_POST["Keep_Flag"] == 1) {
 <script src="js/main.js"></script>
 
 <body>
-  <?php if (isset($userMessage)) {
-    echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . h($tasks) . h($userMessage) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
+  <?php if (isset($db->UserMessage)) {
+    echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . $db->hsc($db->UserMessage) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
   }
   if (isset($alertMessage)) {
     echo "<div data-toggle='modal' data-target='#deleteGoalModal'></div>";
   }
   ?>
-
 
   <div class="d-flex" id="wrapper">
     <div id="page-content-wrapper">
@@ -156,26 +151,28 @@ if ($_POST["Keep_Flag"] == 1) {
     </div>
   </div>
 
-  <div class=""></div>
-
-  <div class="modal" id="deleteGoalModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <p>目標を削除しますか？</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" onclick="deleteGoal(true)">はい</button>
-          <!-- <button type="button" class="btn btn-primary invisible" data-dismiss="modal">はい</button> -->
-          <button type="button" class="btn btn-secondary" onclick="deleteGoal(false)">いいえ</button>
-        </div>
-      </div>
+  <div id="carouselExampleControls" class="carousel slide" data-ride="carousel" style="height:100%">
+    <div class="carousel-inner" style="height:100%">
+      <?php
+      if (isset($db->Goal)) {
+        echo "<div class='carousel-item active' style='height:100%'><div class='font-weight-light align-items-center justify-content-center' style='height:100%' alt='First slide'>" . $db->Goal . "</div></div>";
+      }
+      if (isset($db->task)) {
+        echo "<div class='carousel-item align-items-center justify-content-center' style='height:100%'><div class='font-weight-light text-center d-block w-100' alt='Second slide'>" . $db->tasks . "</div></div>";
+      }
+      if (isset($db->days)) {
+        echo "<div class='carousel-item align-items-center justify-content-center' style='height:100%'><div class='font-weight-light text-center d-block w-100' alt='Second slide'>" . $db->days . "</div></div>";
+      }
+      ?>
     </div>
+    <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="sr-only">Previous</span>
+    </a>
+    <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="sr-only">Next</span>
+    </a>
   </div>
 
   <div class="modal" id="logoutModal" tabindex="-1" role="dialog">

@@ -1,8 +1,6 @@
 <?php
 require_once("config.php");
 
-session_start();
-
 class DBContoller
 {
   private $UserMessage = null;
@@ -12,21 +10,23 @@ class DBContoller
   private $datenow  = null;
   private $koushin = null;
   private $dateout = null;
+  private $datecheck = null;
   private $dsn = null;
   private $pdo = null;
   private $row = null;
 
   function __construct()
   {
+    session_start();
     $this->dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', dbhostname, dbname);
     $this->pdo = new PDO($this->dsn, dbusername, dbpassword, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
     try {
-      $stmt = $this->pdo->prepare("SELECT * FROM Users,Tasks WHERE UserId = ? AND Users.UserId = Tasks.TaskUserId AND Tasks.EndFlag =0");
+      $stmt = $this->pdo->prepare("SELECT * FROM Users,Tasks WHERE UserId = ? AND Users.UserId = Tasks.TaskUserId AND Tasks.EndFlag = 0");
       $stmt->execute(array($_SESSION["ID"]));
       $this->row = $stmt->fetch(PDO::FETCH_ASSOC);
       $this->datenow  = (int) date("Ymd");
-      $this->koushin = $this->datenow  + 1 - $this->row["TaskCounter"] - $this->row["StartDate"];
-      $this->dateout = $this->datenow  - $this->row["EndDate"];
+      $this->dateout = $this->row["EndDate"] - $this->datenow;
+      $this->datecheck = $this->datenow - $this->row["StartDate"];
       if (isset($this->row["Goal"])) {
         $this->goal = sprintf("現在の目標は%sです", $this->row["Goal"]);
         $this->days = sprintf("%s日継続中です", $this->row["TaskCounter"]);
@@ -37,7 +37,7 @@ class DBContoller
         preg_match("/[0-9０－９]+/", $this->row["Task"], $today_task_num);
         preg_match_all("/[^0-9]+/", $this->row["Task"], $today_task_stmt, PREG_SET_ORDER);
         $today_task_num[0] = ceil((int) $today_task_num[0] / (int) $this->row["Period"]);
-        $this->task = sprintf("やるべきこと：%s", $today_task_stmt[0][0] . $today_task_num[0] . $today_task_stmt[1][0]);
+        $this->task = sprintf("やるべきこと：%s", $today_task_stmt[0][0]);
       }
     } catch (PDOException $e) {
       $this->UserMessage = $e->getmessage();
@@ -46,29 +46,32 @@ class DBContoller
 
   function endTask()
   {
-    if ($this->dateout > 1) {
+    if ($this->dateout < 0) {
       $this->UserMessage = "目標達成予定日を過ぎてしまいました 新しい目標を設定してください";
       $this->deleteGoal();
     }
-    if ($this->koushin > 1) {
+    if ($this->datecheck != $this->row["TaskCounter"] && $this->datecheck > 3) {
       try {
-        $AddCounter = $this->koushin;
-        $stmt = $this->pdo->prepare("UPDATE Tasks SET TaskCounter =? WHERE EndFlag =0");
+
+        $AddCounter = $this->row["TaskCounter"] + 1;
+        $stmt = $this->pdo->prepare("UPDATE Tasks SET TaskCounter = ? WHERE EndFlag = 0");
         $stmt->execute(array($AddCounter));
-        $this->UserMessage = "予定より" . $this->koushin . "日遅れています";
+        $this->UserMessage = sprintf("予定より%s日遅れています", $this->datecheck);
+        $this->days = sprintf("%s日継続中です", $this->row["TaskCounter"]);
       } catch (PDOException $e) {
         $this->UserMessage = $e->getmessage();
       }
-    } elseif ($this->koushin == 1) {
+    } elseif ($this->datecheck != $this->row["TaskCounter"]) {
       try {
-        $AddCounter = $this->koushin;
-        $stmt = $this->pdo->prepare("UPDATE Tasks SET TaskCounter =? WHERE EndFlag =0");
+        $AddCounter = $this->row["TaskCounter"] + 1;
+        $stmt = $this->pdo->prepare("UPDATE Tasks SET TaskCounter = ? WHERE EndFlag = 0");
         $stmt->execute(array($AddCounter));
         $this->UserMessage = "今日もお疲れ様です！";
+        $this->days = sprintf("%s日継続中です", $this->row["TaskCounter"]);
       } catch (PDOException $e) {
         $this->UserMessage = $e->getmessage();
       }
-    } elseif ($this->koushin == 0) {
+    } else {
       $this->UserMessage = "今日の分は終わっています";
     }
   }
@@ -113,11 +116,6 @@ class DBContoller
     return $this->days;
   }
 
-  function getkoushin()
-  {
-    return $this->koushin;
-  }
-
   function getRow($str)
   {
     return $this->row[$str];
@@ -135,7 +133,7 @@ if ($db->getRow("TaskNo")) {
   filter_input(INPUT_POST, "endTask") ? $db->endTask() : false;
 }
 
-if ($db->getRow("TaskCounter") == $db->getRow("Period") && $db->getkoushin() == 0) {
+if ($db->getRow("TaskCounter") != null && $db->getRow("Period") != null && $db->getRow("TaskCounter") === $db->getRow("Period")) {
   $db->checkGoal();
 }
 ?>
@@ -143,6 +141,7 @@ if ($db->getRow("TaskCounter") == $db->getRow("Period") && $db->getkoushin() == 
 <html>
 
 <head>
+  <title>もくひょうくん</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -170,7 +169,7 @@ if ($db->getRow("TaskCounter") == $db->getRow("Period") && $db->getkoushin() == 
               <a class="nav-link" href="main.php">ホーム <span class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="set_goal.php">目標作成</a>
+              <a class="nav-link" href="setgoal.php">目標作成</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" data-toggle="modal" data-target="#logoutModal">ログアウト</a>
@@ -190,13 +189,13 @@ if ($db->getRow("TaskCounter") == $db->getRow("Period") && $db->getkoushin() == 
     <div class="carousel-inner" style="height:100%">
       <?php
       if ($db->getGoal()) {
-        echo "<div class='carousel-item active' style='height:100%'><div class='font-weight-light align-items-center justify-content-center' style='height:100%' alt='First slide'>" . $db->getGoal() . "</div></div>";
+        echo "<div class='carousel-item active' style='height:100%' alt='first'><label class='font-weight-light'>" . $db->getGoal() . "</label></div>";
       }
       if ($db->getTask()) {
-        echo "<div class='carousel-item align-items-center justify-content-center' style='height:100%'><div class='font-weight-light text-center d-block w-100' alt='Second slide'>" . $db->getTask() . "</div></div>";
+        echo "<div class='carousel-item' style='height:100%' alt='second'><label class='font-weight-light'>" . $db->getTask() . "</label></div>";
       }
       if ($db->getDays()) {
-        echo "<div class='carousel-item align-items-center justify-content-center' style='height:100%'><div class='font-weight-light text-center d-block w-100' alt='Second slide'>" . $db->getDays() . "</div></div>";
+        echo "<div class='carousel-item' style='height:100%' alt='third'><label class='font-weight-light'>" . $db->getDays() . "</label></div>";
       }
       ?>
     </div>

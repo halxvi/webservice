@@ -205,7 +205,7 @@ if (!isset($_SESSION["ID"])) {
         echo "<div class='carousel-item' style='height:100%' alt='second'><label class='font-weight-light tasktxt'>" . $db->hsc($db->getTask()) . "</label></div>";
       }
       if ($db->getDays()) {
-        echo "<div class='carousel-item' style='height:100%' alt='third'><label class='font-weight-light daystxt'>" . $db->hsc($db->getDays()) . "</label></div>";
+        echo "<div class='carousel-item' style='height:100%' alt='third'><label class='font-weight-light daystxt'>" . $db->hsc($db->getDays()) . "</label><br><div class='progress'><div class='progress-bar' role='progressbar' style='width: 25%;' aria-valuenow='25' aria-valuemin='0' aria-valuemax='100'>25%</div></div></div>";
       }
       ?>
     </div>

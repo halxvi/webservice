@@ -23,12 +23,14 @@ class SignupController
         $Password = filter_input(INPUT_POST, 'Password');
         $this->numalphabetchecker($UserName) && $this->strlengthchecker($UserName, 4, 10) ? $UserName = $UserName : $UserName = false;
         $this->numalphabetchecker($Password) && $this->strlengthchecker($Password, 8, 16) ? $Password = password_hash($Password, PASSWORD_DEFAULT) : $Password = false;
+        $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', dbhostname, dbname);
+        $pdo = new PDO($dsn, dbusername, dbpassword, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
         if ($UserName && $Password) {
             try {
-                $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', dbhostname, dbname);
-                $pdo = new PDO($dsn, dbusername, dbpassword, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
                 $stmt = $pdo->prepare('INSERT INTO Users(UserName,UserPassword) VALUE(?,?)');
-                $stmt->execute(array($UserName, $Password));
+                $stmt->bindValue(1, $UserName, PDO::PARAM_STR);
+                $stmt->bindValue(2, $Password, PDO::PARAM_STR);
+                $stmt->execute();
                 $this->UserMessage = "登録が完了しました";
             } catch (PDOException $e) {
                 $messageflag = preg_match('/Duplicate/', $e->getmessage());

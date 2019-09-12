@@ -16,24 +16,35 @@ class SetGoalController
 
   function sendData()
   {
-    $StartDate = (int) date("Ymd");
-    $AlterTerm = (int) $_POST["term"];
-    $EndDate = time() + ($AlterTerm * 24 * 60 * 60);
-    $EndDate = (int) date("Ymd", $EndDate);
+    $Day = (int) date("d");
+    $Term = (int) filter_input(INPUT_POST, "term");
+    $Month = (int) date("m");
     try {
       $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM Tasks WHERE TaskUserId = ? AND EndFlag = 0");
-      $stmt->execute(array($_SESSION["ID"]));
+      $stmt->bindValue(1, $_SESSION["ID"], PDO::PARAM_STR);
+      $stmt->execute();
       $Recode_Check = $stmt->fetch(PDO::FETCH_NUM);
       if ($Recode_Check[0] == 0) {
-        $stmt = $this->pdo->prepare("INSERT INTO Tasks(TaskUserId, Goal, Task,Way, Period, StartDate, EndDate) value(?,?,?,?,?,?,?)");
-        $stmt->execute(array($_SESSION["ID"], $_POST["object"], $_POST["quantitiy"], $_POST["way"], $_POST["term"], $StartDate, $EndDate));
-        $this->UserMessage = "登録しました！";
+        $stmt = $this->pdo->prepare("INSERT INTO Tasks(TaskUserId, Goal, Task, Period, Day, Month) value(:id,:goal,:way,:term,:day,:month)");
+        $stmt->bindValue(':id', $_SESSION["ID"], PDO::PARAM_STR);
+        $stmt->bindValue(':goal', $_POST["goal"], PDO::PARAM_STR);
+        $stmt->bindValue(':way', $_POST["way"], PDO::PARAM_STR);
+        $stmt->bindValue(':term', $_POST["term"], PDO::PARAM_INT);
+        $stmt->bindValue(':day', $Day, PDO::PARAM_INT);
+        $stmt->bindValue(':month', $Month, PDO::PARAM_INT);
+        $stmt->execute();
+        $this->UserMessage = "目標を登録しました！";
       } else {
         $this->UserMessage = "既に目標があります 現在の目標を削除してください";
       }
     } catch (PDOException $e) {
       $this->UserMessage = $e->getmessage();
     }
+  }
+
+  function getPDO()
+  {
+    return $this->pdo;
   }
 
   function getUserMessage()
@@ -58,14 +69,19 @@ if (filter_input(INPUT_POST, "senddata")) {
   $setgoal->sendData();
 }
 
-if (filter_input(INPUT_POST, "TaskDeleteFlag") === 1) {
+if (filter_input(INPUT_POST, "taskdelete")) {
   try {
+    $pdo = $setgoal->getPDO();
     $stmt = $pdo->prepare("UPDATE Tasks SET EndFlag = 1 WHERE EndFlag = 0 AND TaskUserId = ? ");
     $stmt->execute(array($_SESSION["ID"]));
   } catch (PDOException $e) {
-    $this->UserMessage = $e->getmessage();
+    $setgoal->setUserMessage($e->getmessage());
   }
   $setgoal->setUserMessage("目標を削除しました");
+}
+
+if (!isset($_SESSION["ID"])) {
+  header("location:login.php");
 }
 ?>
 <html>
@@ -99,7 +115,7 @@ if (filter_input(INPUT_POST, "TaskDeleteFlag") === 1) {
               <a class="nav-link" href="main.php">ホーム <span class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="setgoal.php">目標作成</a>
+              <a class="nav-link" href="setgoal.php">目標設定</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" data-toggle="modal" data-target="#logoutModal">ログアウト</a>
@@ -110,38 +126,19 @@ if (filter_input(INPUT_POST, "TaskDeleteFlag") === 1) {
 
       <div class="container-fluid">
         <form method="POST">
-          <p>目標</p><input type='text' name='object' required>
-          <p>達成期間</p>
-          <select name="term">
+          <p class="m-2">目標</p><input type='text' class="m-1" name='goal'>
+          <p class="m-2">達成期間</p>
+          <select name="term" class="m-2">
             <option value="7">1週間</option>
             <option value="14">2週間</option>
             <option value="30">1ヶ月</option>
           </select>
-          <p>達成手段<br><span class="text-muted">具体的な数字を含めるようにしてください　例：テキストを１００ページやる</span></p>
-          <input type="text" name="quantitiy">
-          <p>達成手順</p><input type="text" name="way">
-          <input type="submit" name="senddata" class="btn btn-primary" value="完了">
+          <p class="m-2">１日の量<br><span class="text-muted">例：○○の参考書を１０ページやる</span></p>
+          <input type="text" class="m-2" name="way"><br>
+          <input type="submit" name="senddata" class="btn btn-primary m-2" value="完了">
+          <input type="submit" name="taskdelete" class="btn btn-secondary m-2" value="現在の目標を削除する">
         </form>
-        <input type="submit" name="taskdelete" class="btn btn-secondary" data-toggle="modal" data-target="#taskdeleteModal" value="現在の目標を削除する">
-      </div>
-    </div>
-  </div>
 
-  <div class="modal" id="taskdeleteModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <p>現在の目標を削除しますか？</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" onclick="taskDelete()">はい</button>
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">いいえ</button>
-        </div>
       </div>
     </div>
   </div>
@@ -158,7 +155,7 @@ if (filter_input(INPUT_POST, "TaskDeleteFlag") === 1) {
           <p>ログアウトしますか？</p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" onclick="logout()">はい</button>
+          <button type="button" class="btn btn-primary" onclick="logout()" data-dismiss="modal">はい</button>
           <button type="button" class="btn btn-secondary" data-dismiss="modal">いいえ</button>
         </div>
       </div>

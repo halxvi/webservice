@@ -7,8 +7,8 @@ class DBContoller
   private $task = null;
   private $goal = null;
   private $days = null;
-  private $datenow  = null;
-  private $koushin = null;
+  private $day  = null;
+  private $month = null;
   private $dateout = null;
   private $datecheck = null;
   private $dsn = null;
@@ -20,27 +20,21 @@ class DBContoller
     session_start();
     $this->dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', dbhostname, dbname);
     $this->pdo = new PDO($this->dsn, dbusername, dbpassword, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
-    try {
-      $stmt = $this->pdo->prepare("SELECT * FROM Users,Tasks WHERE UserId = ? AND Users.UserId = Tasks.TaskUserId AND Tasks.EndFlag = 0");
-      $stmt->execute(array($_SESSION["ID"]));
-      $this->row = $stmt->fetch(PDO::FETCH_ASSOC);
-      $this->datenow  = (int) date("Ymd");
-      $this->dateout = $this->row["EndDate"] - $this->datenow;
-      $this->datecheck = $this->datenow - $this->row["StartDate"];
-      if (isset($this->row["Goal"])) {
-        $this->goal = sprintf("現在の目標は%sです", $this->row["Goal"]);
+    $this->getTable();
+    $this->day  = (int) date("d");
+    $this->month  = (int) date("m");
+    $this->dateout = $this->row["Day"] - $this->datenow;
+    $this->datecheck = $this->datenow - $this->row["Month"];
+    if (isset($this->row["Goal"])) {
+      $this->goal = sprintf("現在の目標は%sです", $this->row["Goal"]);
+      if ($this->row["TaskCounter"] != 0) {
         $this->days = sprintf("%s日継続中です", $this->row["TaskCounter"]);
-      } else {
-        $this->UserMessage = sprintf("ようこそ%sさん\n目標を作りましょう", $_SESSION["Name"]);
       }
-      if (isset($this->row["Task"])) {
-        preg_match("/[0-9０－９]+/", $this->row["Task"], $today_task_num);
-        preg_match_all("/[^0-9]+/", $this->row["Task"], $today_task_stmt, PREG_SET_ORDER);
-        $today_task_num[0] = ceil((int) $today_task_num[0] / (int) $this->row["Period"]);
-        $this->task = sprintf("やるべきこと：%s", $today_task_stmt[0][0]);
-      }
-    } catch (PDOException $e) {
-      $this->UserMessage = $e->getmessage();
+    } else {
+      $this->UserMessage = sprintf("ようこそ%sさん\n目標を作りましょう", $_SESSION["Name"]);
+    }
+    if (isset($this->row["Task"])) {
+      $this->task = sprintf("今日やること：%s", $this->row["Task"]);
     }
   }
 
@@ -52,10 +46,11 @@ class DBContoller
     }
     if ($this->datecheck != $this->row["TaskCounter"] && $this->datecheck > 3) {
       try {
-
         $AddCounter = $this->row["TaskCounter"] + 1;
         $stmt = $this->pdo->prepare("UPDATE Tasks SET TaskCounter = ? WHERE EndFlag = 0");
-        $stmt->execute(array($AddCounter));
+        $stmt->bindValue(1, $AddCounter, PDO::PARAM_INT);
+        $stmt->execute();
+        $this->getTable();
         $this->UserMessage = sprintf("予定より%s日遅れています", $this->datecheck);
         $this->days = sprintf("%s日継続中です", $this->row["TaskCounter"]);
       } catch (PDOException $e) {
@@ -65,7 +60,9 @@ class DBContoller
       try {
         $AddCounter = $this->row["TaskCounter"] + 1;
         $stmt = $this->pdo->prepare("UPDATE Tasks SET TaskCounter = ? WHERE EndFlag = 0");
-        $stmt->execute(array($AddCounter));
+        $stmt->bindValue(1, $AddCounter, PDO::PARAM_INT);
+        $stmt->execute();
+        $this->getTable();
         $this->UserMessage = "今日もお疲れ様です！";
         $this->days = sprintf("%s日継続中です", $this->row["TaskCounter"]);
       } catch (PDOException $e) {
@@ -78,19 +75,28 @@ class DBContoller
 
   function checkGoal()
   {
-    try {
+    if ($this->getRow("TaskCounter") === $this->getRow("Period")) {
       $this->deleteGoal();
       $this->UserMessage = "おめでとうございます！目標を達成しました！";
+    }
+  }
+
+  private function deleteGoal()
+  {
+    try {
+      $stmt = $this->pdo->prepare("UPDATE Tasks SET EndFlag = 1 WHERE EndFlag = 0 AND TaskUserId = ?");
+      $stmt->execute(array($_SESSION["ID"]));
     } catch (PDOException $e) {
       $this->UserMessage = $e->getmessage();
     }
   }
 
-  function deleteGoal()
+  private function getTable()
   {
     try {
-      $stmt = $this->pdo->prepare("UPDATE Tasks SET EndFlag = 1 WHERE EndFlag = 0 AND TaskUserId = ?");
+      $stmt = $this->pdo->prepare("SELECT * FROM Users,Tasks WHERE UserId = ? AND Users.UserId = Tasks.TaskUserId AND Tasks.EndFlag = 0");
       $stmt->execute(array($_SESSION["ID"]));
+      $this->row = $stmt->fetch(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
       $this->UserMessage = $e->getmessage();
     }
@@ -133,8 +139,12 @@ if ($db->getRow("TaskNo")) {
   filter_input(INPUT_POST, "endTask") ? $db->endTask() : false;
 }
 
-if ($db->getRow("TaskCounter") != null && $db->getRow("Period") != null && $db->getRow("TaskCounter") === $db->getRow("Period")) {
+if ($db->getRow("TaskCounter") != null && $db->getRow("Period") != null) {
   $db->checkGoal();
+}
+
+if (!isset($_SESSION["ID"])) {
+  header("location:login.php");
 }
 ?>
 
@@ -169,7 +179,7 @@ if ($db->getRow("TaskCounter") != null && $db->getRow("Period") != null && $db->
               <a class="nav-link" href="main.php">ホーム <span class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="setgoal.php">目標作成</a>
+              <a class="nav-link" href="setgoal.php">目標設定</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" data-toggle="modal" data-target="#logoutModal">ログアウト</a>
@@ -189,13 +199,13 @@ if ($db->getRow("TaskCounter") != null && $db->getRow("Period") != null && $db->
     <div class="carousel-inner" style="height:100%">
       <?php
       if ($db->getGoal()) {
-        echo "<div class='carousel-item active' style='height:100%' alt='first'><label class='font-weight-light'>" . $db->getGoal() . "</label></div>";
+        echo "<div class='carousel-item active' style='height:100%' alt='first'><label class='font-weight-light goaltxt'>" . $db->hsc($db->getGoal()) . "</label></div>";
       }
       if ($db->getTask()) {
-        echo "<div class='carousel-item' style='height:100%' alt='second'><label class='font-weight-light'>" . $db->getTask() . "</label></div>";
+        echo "<div class='carousel-item' style='height:100%' alt='second'><label class='font-weight-light tasktxt'>" . $db->hsc($db->getTask()) . "</label></div>";
       }
       if ($db->getDays()) {
-        echo "<div class='carousel-item' style='height:100%' alt='third'><label class='font-weight-light'>" . $db->getDays() . "</label></div>";
+        echo "<div class='carousel-item' style='height:100%' alt='third'><label class='font-weight-light daystxt'>" . $db->hsc($db->getDays()) . "</label></div>";
       }
       ?>
     </div>

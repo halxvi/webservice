@@ -25,7 +25,7 @@ class LoginController
                 $this->UserMessage = "ユーザー名またはパスワードが間違っています";
             }
         } catch (PDOException $e) {
-            $this->UserMessage = "サーバーエラー";
+            $this->UserMessage = "データベースエラー";
         }
     }
 

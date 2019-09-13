@@ -16,22 +16,18 @@ class SetGoalController
 
   function sendData()
   {
-    $Day = (int) date("d");
-    $Term = (int) filter_input(INPUT_POST, "term");
-    $Month = (int) date("m");
+    $Day = (int) date("Ymd");
     try {
       $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM Tasks WHERE TaskUserId = ? AND EndFlag = 0");
       $stmt->bindValue(1, $_SESSION["ID"], PDO::PARAM_STR);
       $stmt->execute();
       $Recode_Check = $stmt->fetch(PDO::FETCH_NUM);
       if ($Recode_Check[0] == 0) {
-        $stmt = $this->pdo->prepare("INSERT INTO Tasks(TaskUserId, Goal, Task, Period, Day, Month) value(:id,:goal,:way,:term,:day,:month)");
+        $stmt = $this->pdo->prepare("INSERT INTO Tasks(TaskUserId, Goal, Task, Period) value(:id,:goal,:way,:term)");
         $stmt->bindValue(':id', $_SESSION["ID"], PDO::PARAM_STR);
-        $stmt->bindValue(':goal', $_POST["goal"], PDO::PARAM_STR);
-        $stmt->bindValue(':way', $_POST["way"], PDO::PARAM_STR);
-        $stmt->bindValue(':term', $_POST["term"], PDO::PARAM_INT);
-        $stmt->bindValue(':day', $Day, PDO::PARAM_INT);
-        $stmt->bindValue(':month', $Month, PDO::PARAM_INT);
+        $stmt->bindValue(':goal', filter_input(INPUT_POST, "goal"), PDO::PARAM_STR);
+        $stmt->bindValue(':way', filter_input(INPUT_POST, "way"), PDO::PARAM_STR);
+        $stmt->bindValue(':term', filter_input(INPUT_POST, "term"), PDO::PARAM_INT);
         $stmt->execute();
         $this->UserMessage = "目標を登録しました！";
       } else {
@@ -80,7 +76,7 @@ if (filter_input(INPUT_POST, "taskdelete")) {
   $setgoal->setUserMessage("目標を削除しました");
 }
 
-if (!isset($_SESSION["ID"])) {
+if (!$_SESSION["ID"]) {
   header("location:login.php");
 }
 ?>

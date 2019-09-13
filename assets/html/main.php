@@ -8,9 +8,7 @@ class DBContoller
   private $goal = null;
   private $days = null;
   private $day  = null;
-  private $month = null;
-  private $dateout = null;
-  private $datecheck = null;
+
   private $dsn = null;
   private $pdo = null;
   private $row = null;
@@ -18,13 +16,10 @@ class DBContoller
   function __construct()
   {
     session_start();
+    $this->day  = (int) date("Ymd");
     $this->dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', dbhostname, dbname);
     $this->pdo = new PDO($this->dsn, dbusername, dbpassword, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
     $this->getTable();
-    $this->day  = (int) date("d");
-    $this->month  = (int) date("m");
-    $this->dateout = $this->row["Day"] - $this->datenow;
-    $this->datecheck = $this->datenow - $this->row["Month"];
     if (isset($this->row["Goal"])) {
       $this->goal = sprintf("現在の目標は%sです", $this->row["Goal"]);
       if ($this->row["TaskCounter"] != 0) {
@@ -40,34 +35,8 @@ class DBContoller
 
   function endTask()
   {
-    if ($this->dateout < 0) {
-      $this->UserMessage = "目標達成予定日を過ぎてしまいました 新しい目標を設定してください";
-      $this->deleteGoal();
-    }
-    if ($this->datecheck != $this->row["TaskCounter"] && $this->datecheck > 3) {
-      try {
-        $AddCounter = $this->row["TaskCounter"] + 1;
-        $stmt = $this->pdo->prepare("UPDATE Tasks SET TaskCounter = ? WHERE EndFlag = 0");
-        $stmt->bindValue(1, $AddCounter, PDO::PARAM_INT);
-        $stmt->execute();
-        $this->getTable();
-        $this->UserMessage = sprintf("予定より%s日遅れています", $this->datecheck);
-        $this->days = sprintf("%s日継続中です", $this->row["TaskCounter"]);
-      } catch (PDOException $e) {
-        $this->UserMessage = $e->getmessage();
-      }
-    } elseif ($this->datecheck != $this->row["TaskCounter"]) {
-      try {
-        $AddCounter = $this->row["TaskCounter"] + 1;
-        $stmt = $this->pdo->prepare("UPDATE Tasks SET TaskCounter = ? WHERE EndFlag = 0");
-        $stmt->bindValue(1, $AddCounter, PDO::PARAM_INT);
-        $stmt->execute();
-        $this->getTable();
-        $this->UserMessage = "今日もお疲れ様です！";
-        $this->days = sprintf("%s日継続中です", $this->row["TaskCounter"]);
-      } catch (PDOException $e) {
-        $this->UserMessage = $e->getmessage();
-      }
+    if ($this->row["LastAccessDay"] != $this->day) {
+      $this->commitTask();
     } else {
       $this->UserMessage = "今日の分は終わっています";
     }
@@ -100,6 +69,25 @@ class DBContoller
     } catch (PDOException $e) {
       $this->UserMessage = $e->getmessage();
     }
+  }
+
+  private function setCounter()
+  {
+    $AddCounter = $this->row["TaskCounter"] + 1;
+    $stmt = $this->pdo->prepare("UPDATE Tasks SET TaskCounter = ? WHERE EndFlag = 0");
+    $stmt->bindValue(1, $AddCounter, PDO::PARAM_INT);
+    $stmt->execute();
+    $stmt = $this->pdo->prepare("UPDATE Tasks SET LastAccessDay = ? WHERE EndFlag = 0");
+    $stmt->bindValue(1, $this->day, PDO::PARAM_INT);
+    $stmt->execute();
+  }
+
+  private function commitTask()
+  {
+    $this->UserMessage = "今日もお疲れ様です！";
+    $this->setCounter();
+    $this->getTable();
+    $this->days = sprintf("%s日継続中です", $this->row["TaskCounter"]);
   }
 
   function getUserMessage()

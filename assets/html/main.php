@@ -115,6 +115,13 @@ class DBContoller
     return $this->row[$str];
   }
 
+  function getProgress()
+  {
+    $this->getTable();
+    $per =  $this->row["TaskCounter"] / $this->row["Period"] * 100;
+    return ceil($per);
+  }
+
   function hsc($str)
   {
     return htmlspecialchars($str, ENT_QUOTES, "UTF-8", false);
@@ -193,7 +200,7 @@ if (!isset($_SESSION["ID"])) {
         echo "<div class='carousel-item' style='height:100%' alt='second'><label class='font-weight-light tasktxt'>" . $db->hsc($db->getTask()) . "</label></div>";
       }
       if ($db->getDays()) {
-        echo "<div class='carousel-item' style='height:100%' alt='third'><label class='font-weight-light daystxt'>" . $db->hsc($db->getDays()) . "</label><br><div class='progress'><div class='progress-bar' role='progressbar' style='width: 25%;' aria-valuenow='25' aria-valuemin='0' aria-valuemax='100'>25%</div></div></div>";
+        echo "<div class='carousel-item' style='height:100%' alt='third'><label class='font-weight-light daystxt'>" . $db->hsc($db->getDays()) . "</label><br><div class='progress w-75'><div class='progress-bar' role='progressbar' style='width:" . $db->hsc($db->getProgress()) . "%' aria-valuenow='" . $db->hsc($db->getProgress()) . "' aria-valuemin='0' aria-valuemax='100'>" . $db->hsc($db->getProgress()) . "%</div></div></div>";
       }
       ?>
     </div>

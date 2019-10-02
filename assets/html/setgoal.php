@@ -1,5 +1,5 @@
 <?php
-require_once("config.php");
+//require_once("config.php");
 
 class SetGoalController
 {
@@ -10,8 +10,12 @@ class SetGoalController
   function __construct()
   {
     session_start();
-    $this->dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', dbhostname, dbname);
-    $this->pdo = new PDO($this->dsn, dbusername, dbpassword, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+    $dbhostname = getenv('DBHOSTNAME');
+    $dbname = getenv('DBNAME');
+    $dbusername = getenv('DBUSERNAME');
+    $dbpassword = getenv('DBPASSWORD');
+    $this->dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $dbhostname, $dbname);
+    $this->pdo = new PDO($this->dsn, $dbusername, $dbpassword, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
   }
 
   function sendData()

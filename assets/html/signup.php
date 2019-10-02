@@ -1,5 +1,5 @@
 <?php
-require_once("config.php");
+//require_once("config.php");
 
 class SignupController
 {
@@ -23,8 +23,12 @@ class SignupController
         $Password = filter_input(INPUT_POST, 'Password');
         $this->numalphabetchecker($UserName) && $this->strlengthchecker($UserName, 4, 10) ? $UserName = $UserName : $UserName = false;
         $this->numalphabetchecker($Password) && $this->strlengthchecker($Password, 8, 16) ? $Password = password_hash($Password, PASSWORD_DEFAULT) : $Password = false;
-        $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', dbhostname, dbname);
-        $pdo = new PDO($dsn, dbusername, dbpassword, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+        $dbhostname = getenv('DBHOSTNAME');
+        $dbname = getenv('DBNAME');
+        $dbusername = getenv('DBUSERNAME');
+        $dbpassword = getenv('DBPASSWORD');
+        $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $dbhostname, $dbname);
+        $pdo = new PDO($dsn, $dbusername, $dbpassword, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
         if ($UserName && $Password) {
             try {
                 $stmt = $pdo->prepare('INSERT INTO Users(UserName,UserPassword) VALUE(?,?)');

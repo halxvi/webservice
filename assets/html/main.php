@@ -1,5 +1,5 @@
 <?php
-require_once("config.php");
+//require_once("config.php");
 
 class DBContoller
 {
@@ -8,7 +8,6 @@ class DBContoller
   private $goal = null;
   private $days = null;
   private $day  = null;
-
   private $dsn = null;
   private $pdo = null;
   private $row = null;
@@ -16,9 +15,13 @@ class DBContoller
   function __construct()
   {
     session_start();
+    $dbhostname = getenv('DBHOSTNAME');
+    $dbname = getenv('DBNAME');
+    $dbusername = getenv('DBUSERNAME');
+    $dbpassword = getenv('DBPASSWORD');
     $this->day  = (int) date("Ymd");
-    $this->dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', dbhostname, dbname);
-    $this->pdo = new PDO($this->dsn, dbusername, dbpassword, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+    $this->dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $dbhostname, $dbname);
+    $this->pdo = new PDO($this->dsn, $dbusername, $dbpassword, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
     $this->getTable();
     if (isset($this->row["Goal"])) {
       $this->goal = sprintf("現在の目標は%sです", $this->row["Goal"]);

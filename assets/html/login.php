@@ -1,75 +1,112 @@
 <?php
-session_start();
-$db['host'] = "192.168.99.100:13306";
-$db["user"] = "root";
-$db["pass"] = "root";
-$db["dbname"] = "my_system";
+//require_once("config.php");
 
-$errorMessage = "";
+class LoginController
+{
+    private $UserMessage = null;
 
-if (isset($_POST["login"])) {
-    //idチェック
-    $user_name = $_POST["user_name"];
-
-    $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $db['host'], $db['dbname']);
-    //ユーザ情報チェック
-
-    try {
-        //データベースにアクセス，エラーなら例外を投げる
-        $pdo = new PDO($dsn, $db["user"], $db["pass"], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
-        $stmt = $pdo->prepare('SELECT * FROM Users WHERE User_Name = ?');
-        $stmt->execute(array($user_name));
-        $password = $_POST["password"];
-
-        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            if (password_verify($password, $row["User_Password"])) {
-                session_regenerate_id(true);
-                $_SESSION["Name"] = $row["User_Name"];
-                $_SESSION["ID"] = $row["User_Id"];
+    function Login()
+    {
+        $UserName = filter_input(INPUT_POST, "UserName");
+        $dbhostname = getenv('DBHOSTNAME');
+        $dbname = getenv('DBNAME');
+        $dbusername = getenv('DBUSERNAME');
+        $dbpassword = getenv('DBPASSWORD');
+        $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $dbhostname, $dbname);
+        $pdo = new PDO($dsn, $dbusername, $dbpassword, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+        try {
+            $stmt = $pdo->prepare('SELECT * FROM Users WHERE UserName = ?');
+            $stmt->execute(array($UserName));
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $Password = filter_input(INPUT_POST, "Password");
+            if ($UserName = $row["UserName"] && password_verify($Password, $row["UserPassword"])) {
+                session_start();
+                $_SESSION["Name"] = $row["UserName"];
+                $_SESSION["ID"] = $row["UserId"];
                 header("Location: main.php");
                 exit();
             } else {
-                $errorMessage = "ぱすわーどえらー";
+                $this->UserMessage = "ユーザー名またはパスワードが間違っています";
             }
-        } else {
-            $errorMessage = "なんかまちがってます";
+        } catch (PDOException $e) {
+            $this->UserMessage = "データベースエラー";
         }
-    } catch (PDOException $e) {
-        $errorMessage = "データベースエラー";
-        echo htmlspecialchars($e->getmessage(), ENT_QUOTES);
+    }
+
+    function Signup()
+    {
+        header("Location: signup.php");
+        exit();
+    }
+
+    function getUserMessage()
+    {
+        return $this->UserMessage;
+    }
+
+    function hsc($str)
+    {
+        return htmlspecialchars($str, ENT_QUOTES, "UTF-8", false);
     }
 }
-if (isset($_POST["signup"])) {
-    header("Location: signup.php");
-    exit();
+
+$Login = new LoginController();
+
+if (filter_input(INPUT_POST, "Login")) {
+    $Login->Login();
+}
+
+if (filter_input(INPUT_POST, "goSignup")) {
+    $Login->Signup();
 }
 ?>
 
 <html>
 
 <head>
-    <title>ログイン画面</title>
+    <title>もくひょうくん</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link href="vendor/bootstrap/css/bootstrap.min.css" type="text/css" rel="stylesheet">
+    <link href="css/color.scss" type="text/scss" rel="stylesheet">
 </head>
 <script src="vendor/jquery/jquery.min.js"></script>
 <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
 <body>
-    <div class="container">
-        <h1>ログイン</h1>
-        <?php echo htmlspecialchars($errorMessage, ENT_QUOTES); ?>
-        <form id="loginForm" method="POST">
-            <label class="font-weight-bold">ユーザー名:<input type="text" id="user_name" name="user_name" required></label>
-            <br>
-            <label class="font-weight-bold">password:<input type="password" id="password" name="password" required></label>
-            <br><input type="submit" name="login" class="btn btn-primary" value="ログイン">
-        </form>
-        <form method="POST">
-            <input type="submit" name="signup" class="btn btn-outline-primary" value="サインアップ">
-        </form>
+
+    <?php if ($Login->getUserMessage()) {
+        echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . $Login->hsc($Login->getUserMessage()) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
+    } ?>
+
+
+    <div class="container-fluid bg-light" style="height:100%;">
+        <div class="d-flex align-items-center justify-content-center" style="height:100%">
+            <div class="border border-info rounded p-4">
+                <div class="d-flex justify-content-center m-4">
+                    <h3>ログイン<h3>
+                </div>
+                <form id="LoginForm" method="POST">
+                    <div class="d-flex justify-content-center m-3">
+                        <div class="form-group">
+                            <label class="font-weight-bold">ユーザー名</label>
+                            <input type="text" id="UserName" class="border border-secondary rounded" name="UserName">
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center m-3">
+                        <div class="form-group">
+                            <label class="font-weight-bold">パスワード</label>
+                            <input type="Password" id="Password" class="border border-secondary rounded" name="Password">
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center m-3">
+                        <div class="form-group">
+                            <input type="submit" name="Login" class="btn btn-info m-3" value="ログイン">
+                            <input type="submit" name="goSignup" class="btn btn-outline-info m-3" value="サインアップ">
+                        </div>
+                    </div>
+            </div>
+        </div>
     </div>
-
 </body>
-
 
 </html>

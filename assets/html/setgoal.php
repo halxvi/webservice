@@ -10,12 +10,10 @@ class SetGoalController
   function __construct()
   {
     session_start();
-    $dbhostname = getenv('DBHOSTNAME');
-    $dbname = getenv('DBNAME');
-    $dbusername = getenv('DBUSERNAME');
-    $dbpassword = getenv('DBPASSWORD');
-    $this->dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $dbhostname, $dbname);
-    $this->pdo = new PDO($this->dsn, $dbusername, $dbpassword, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+    $dbENV = parse_url($_SERVER["CLEARDB_DATABASE_URL"]);
+    $dbENV['dbname'] = ltrim($dbENV['path'], '/');
+    $this->dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $dbENV['host'], $dbENV['dbname']);
+    $this->pdo = new PDO($this->dsn, $dbENV['user'], $dbENV['pass'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
   }
 
   function sendData()

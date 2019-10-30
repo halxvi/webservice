@@ -1,34 +1,4 @@
 <?php
-<<<<<<< HEAD
-session_start();
-$db['host'] = "192.168.99.100:13306";
-$db["user"] = "root";
-$db["pass"] = "root";
-$db["dbname"] = "my_system";
-
-$dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $db['host'], $db['dbname']);
-$pdo = new PDO($dsn, $db['user'], $db['pass'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
-
-$_SESSION["userMessage"] = null;
-$_SESSION["DateOutMessage"] = null;
-$_SESSION["tasks"] = "";
-$_SESSION["mokuhyo"] = "";
-
-try {
-  $stmt = $pdo->prepare("SELECT * FROM Users,Tasks WHERE User_Id = ? AND Users.User_Id = Tasks.Task_User_Id AND Tasks.End_Flag =0");
-  $stmt->execute(array($_SESSION["ID"]));
-  $row = $stmt->fetch(PDO::FETCH_ASSOC);
-  if (isset($row["Goal"])) {
-    $_SESSION["mokuhyo"] = sprintf("現在の目標は%sです\n", $row["Goal"]);
-  } else {
-    $_SESSION["userMessage"] = sprintf("ようこそ%sさん\n目標を作りましょう", $_SESSION["Name"]);
-  }
-  if (isset($row["Task"])) {
-    preg_match("/[0-9０－９]+/", $row["Task"], $today_task_num);  //Taskから正規表現で数字を抜く
-    preg_match_all("/[^0-9]+/", $row["Task"], $today_task_stmt, PREG_SET_ORDER); //Taskから正規表現で数字以外を抜く
-    $today_task_num[0] = ceil($today_task_num[0] / $row["Period"]);
-    $_SESSION["tasks"] = sprintf("お疲れ様です%sさん\n%s日継続しています\nやるべきこと：%s", $_SESSION["Name"], $row["Task_Counter"], $today_task_stmt[0][0] . $today_task_num[0] . $today_task_stmt[1][0]);
-=======
 //require_once("config.php");
 
 class DBContoller
@@ -45,13 +15,11 @@ class DBContoller
   function __construct()
   {
     session_start();
-    $dbhostname = getenv('DBHOSTNAME');
-    $dbname = getenv('DBNAME');
-    $dbusername = getenv('DBUSERNAME');
-    $dbpassword = getenv('DBPASSWORD');
+    $dbENV = parse_url($_SERVER["CLEARDB_DATABASE_URL"]);
+    $dbENV['dbname'] = ltrim($dbENV['path'], '/');
+    $this->dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $dbENV['host'], $dbENV['dbname']);
+    $this->pdo = new PDO($this->dsn, $dbENV['user'], $dbENV['pass'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
     $this->day  = (int) date("Ymd");
-    $this->dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $dbhostname, $dbname);
-    $this->pdo = new PDO($this->dsn, $dbusername, $dbpassword, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
     $this->getTable();
     if (isset($this->row["Goal"])) {
       $this->goal = sprintf("現在の目標は%sです", $this->row["Goal"]);
@@ -64,16 +32,8 @@ class DBContoller
     if (isset($this->row["Task"])) {
       $this->task = sprintf("今日やること：%s", $this->row["Task"]);
     }
->>>>>>> 90058cbad6c9ac33a8f59249d96a084ae93d4f5c
   }
 
-<<<<<<< HEAD
-if (isset($_POST["end_task"]) && isset($row["Task_No"])) {
-  //現在のタスクがある状態で押すと動く
-  if ($koushin > 1) {
-    $_SESSION["AlertMessage"] = "予定より" . $koushin . "日遅れています　継続しますか？";
-  } elseif ($koushin == 1) {
-=======
   function endTask()
   {
     if ($this->row["LastAccessDay"] != $this->day) {
@@ -103,7 +63,6 @@ if (isset($_POST["end_task"]) && isset($row["Task_No"])) {
 
   private function getTable()
   {
->>>>>>> 90058cbad6c9ac33a8f59249d96a084ae93d4f5c
     try {
       $stmt = $this->pdo->prepare("SELECT * FROM Users,Tasks WHERE UserId = ? AND Users.UserId = Tasks.TaskUserId AND Tasks.EndFlag = 0");
       $stmt->execute(array($_SESSION["ID"]));
@@ -232,21 +191,6 @@ if (!isset($_SESSION["ID"])) {
     </div>
   </div>
 
-<<<<<<< HEAD
-      <div class="container-fluid">
-        <div class="cl_mokuhyo">
-          <?php
-          echo htmlspecialchars($_SESSION["mokuhyo"]);
-          ?>
-        </div>
-        <div class="cl_tasks">
-          <?php
-          echo htmlspecialchars($_SESSION["tasks"]);
-          ?>
-        </div>
-      </div>
-    </div>
-=======
   <div id="carouselExampleControls" class="carousel slide" data-ride="carousel" style="height:100%">
     <div class="carousel-inner" style="height:100%">
       <?php
@@ -270,7 +214,6 @@ if (!isset($_SESSION["ID"])) {
       <span class="sr-only">Next</span>
     </a>
   </div>
->>>>>>> 90058cbad6c9ac33a8f59249d96a084ae93d4f5c
 
   <div class="modal" id="logoutModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">

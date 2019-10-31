@@ -101,7 +101,7 @@ if (!$_SESSION["ID"]) {
   } ?>
 
   <div class="d-flex" id="wrapper">
-    <div id="page-content-wrapper">
+    <div id="page-content-wrapper" class="w-100">
       <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>

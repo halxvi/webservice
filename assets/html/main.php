@@ -149,7 +149,7 @@ if (!isset($_SESSION["ID"])) {
 <head>
   <title>もくひょうくん</title>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="css/simple-sidebar.css" rel="stylesheet">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
@@ -182,37 +182,25 @@ if (!isset($_SESSION["ID"])) {
             </li>
           </ul>
         </div>
-        <div class="d-flex align-items-center justify-content-center m-1">
-          <form class="m-0" method="POST">
-            <input type="submit" name="endTask" class="btn btn-primary" value="今日の分終了！">
-          </form>
-        </div>
       </nav>
     </div>
   </div>
 
-  <div id="carouselExampleControls" class="carousel slide" data-ride="carousel" style="height:100%">
-    <div class="carousel-inner" style="height:100%">
-      <?php
-      if ($db->getGoal()) {
-        echo "<div class='carousel-item active' style='height:100%' alt='first'><label class='font-weight-light goaltxt'>" . $db->hsc($db->getGoal()) . "</label></div>";
-      }
-      if ($db->getTask()) {
-        echo "<div class='carousel-item' style='height:100%' alt='second'><label class='font-weight-light tasktxt'>" . $db->hsc($db->getTask()) . "</label></div>";
-      }
-      if ($db->getDays()) {
-        echo "<div class='carousel-item' style='height:100%' alt='third'><label class='font-weight-light daystxt'>" . $db->hsc($db->getDays()) . "</label><br><div class='progress w-75'><div class='progress-bar' role='progressbar' style='width:" . $db->hsc($db->getProgress()) . "%' aria-valuenow='" . $db->hsc($db->getProgress()) . "' aria-valuemin='0' aria-valuemax='100'>" . $db->hsc($db->getProgress()) . "%</div></div></div>";
-      }
-      ?>
-    </div>
-    <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
-      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-      <span class="sr-only">Previous</span>
-    </a>
-    <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
-      <span class="carousel-control-next-icon" aria-hidden="true"></span>
-      <span class="sr-only">Next</span>
-    </a>
+  <?php
+  if ($db->getGoal()) {
+    echo "<div><label class='font-weight-light goaltxt'>" . $db->hsc($db->getGoal()) . "</label></div>";
+  }
+  if ($db->getTask()) {
+    echo "<div><label class='font-weight-light tasktxt'>" . $db->hsc($db->getTask()) . "</label></div>";
+  }
+  if ($db->getDays()) {
+    echo "<div><label class='font-weight-light daystxt'>" . $db->hsc($db->getDays()) . "</label><br><div class='progress w-75'><div class='progress-bar' role='progressbar' style='width:" . $db->hsc($db->getProgress()) . "%' aria-valuenow='" . $db->hsc($db->getProgress()) . "' aria-valuemin='0' aria-valuemax='100'>" . $db->hsc($db->getProgress()) . "%</div></div></div>";
+  }
+  ?>
+  <div class="d-flex align-items-center justify-content-center m-1">
+    <form class="m-0" method="POST">
+      <input type="submit" name="endTask" class="btn btn-primary" value="今日の分終了！">
+    </form>
   </div>
 
   <div class="modal" id="logoutModal" tabindex="-1" role="dialog">

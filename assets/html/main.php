@@ -182,6 +182,11 @@ if (!isset($_SESSION["ID"])) {
             </li>
           </ul>
         </div>
+        <div class="d-flex align-items-center justify-content-center m-1">
+          <form class="m-0" method="POST">
+            <input type="submit" name="endTask" class="btn btn-primary" value="今日の分終了！">
+          </form>
+        </div>
       </nav>
     </div>
   </div>
@@ -197,11 +202,6 @@ if (!isset($_SESSION["ID"])) {
     echo "<div><label class='font-weight-light daystxt'>" . $db->hsc($db->getDays()) . "</label><br><div class='progress w-75'><div class='progress-bar' role='progressbar' style='width:" . $db->hsc($db->getProgress()) . "%' aria-valuenow='" . $db->hsc($db->getProgress()) . "' aria-valuemin='0' aria-valuemax='100'>" . $db->hsc($db->getProgress()) . "%</div></div></div>";
   }
   ?>
-  <div class="d-flex align-items-center justify-content-center m-1">
-    <form class="m-0" method="POST">
-      <input type="submit" name="endTask" class="btn btn-primary" value="今日の分終了！">
-    </form>
-  </div>
 
   <div class="modal" id="logoutModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">

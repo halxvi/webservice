@@ -18,7 +18,11 @@ class SetGoalController
 
   function sendData()
   {
-    $Day = (int) date("Ymd");
+    //$Day = (int) date("Ymd");
+    if (!filter_input(INPUT_POST, "goal")) {
+      $this->UserMessage = "目標を入力してください";
+      return;
+    }
     try {
       $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM Tasks WHERE TaskUserId = ? AND EndFlag = 0");
       $stmt->bindValue(1, $_SESSION["ID"], PDO::PARAM_STR);

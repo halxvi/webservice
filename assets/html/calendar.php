@@ -13,7 +13,6 @@ class Calendar
         $this->month = date('n');
         setcookie('month', $this->month);
         $this->lastday = date('j', mktime(0, 0, 0, $this->month + 1, 0, $this->year));
-        $this->makeCalender(null);
     }
 
     function makeCalender($stat)

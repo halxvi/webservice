@@ -1,24 +1,20 @@
 <?php
-//require_once("config.php");
+require_once("db.php");
 
-class SetGoalController
+class SetGoal
 {
   private $UserMessage = null;
-  private $dsn = null;
   private $pdo = null;
 
   function __construct()
   {
     session_start();
-    $dbENV = parse_url($_SERVER["CLEARDB_DATABASE_URL"]);
-    $dbENV['dbname'] = ltrim($dbENV['path'], '/');
-    $this->dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $dbENV['host'], $dbENV['dbname']);
-    $this->pdo = new PDO($this->dsn, $dbENV['user'], $dbENV['pass'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+    $db = new DB();
+    $this->pdo = $db->getPDO();
   }
 
   function sendData()
   {
-    //$Day = (int) date("Ymd");
     if (!filter_input(INPUT_POST, "goal")) {
       $this->UserMessage = "目標を入力してください";
       return;
@@ -29,12 +25,21 @@ class SetGoalController
       $stmt->execute();
       $Recode_Check = $stmt->fetch(PDO::FETCH_NUM);
       if ($Recode_Check[0] == 0) {
-        $stmt = $this->pdo->prepare("INSERT INTO Tasks(TaskUserId, Goal, Task, Period) value(:id,:goal,:way,:term)");
+        $stmt = $this->pdo->prepare("INSERT INTO Tasks(TaskUserId, Goal, Task, Period,StartDate,EndDate) value(:id,:goal,:way,:term,:start,:end)");
         $stmt->bindValue(':id', $_SESSION["ID"], PDO::PARAM_STR);
         $stmt->bindValue(':goal', filter_input(INPUT_POST, "goal"), PDO::PARAM_STR);
         $stmt->bindValue(':way', filter_input(INPUT_POST, "way"), PDO::PARAM_STR);
         $stmt->bindValue(':term', filter_input(INPUT_POST, "term"), PDO::PARAM_INT);
+        $stmt->bindValue(':start', date("Ymd"));
+        $stmt->bindValue(':end', mktime(0, 0, 0, date(Y), date(m), date(d) + rand(filter_input(INPUT_POST, "term") + 3, filter_input(INPUT_POST, "term") + 15)));
         $stmt->execute();
+        // $stmt = $this->pdo->prepare("SELECT TaskNo FROM Tasks WHERE TaskUserId = ? AND EndFlag = 0");
+        // $stmt->bindValue(':id', $_SESSION["ID"], PDO::PARAM_STR);
+        // $stmt->execute();
+        // $taskNo = $stmt->fetch(PDO::FETCH_NUM);
+        // $date = date("Ymd");
+        // $stmt = $this->pdo->prepare("INSERT INTO Counter(UserId,TaskNo,Date) value(:id,)");
+        // $stmt->bindValue(':id', $_SESSION["ID"], PDO::PARAM_STR);
         $this->UserMessage = "目標を登録しました！";
       } else {
         $this->UserMessage = "既に目標があります 現在の目標を削除してください";
@@ -65,7 +70,7 @@ class SetGoalController
   }
 }
 
-$setgoal = new SetGoalController();
+$setgoal = new SetGoal();
 
 if (filter_input(INPUT_POST, "senddata")) {
   $setgoal->sendData();

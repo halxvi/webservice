@@ -143,6 +143,8 @@ if (!isset($_SESSION["ID"])) {
 
 $calendar = new Calendar();
 
+$calendar->makeCalender(null);
+
 if (isset($_REQUEST['previousMonth'])) {
   $calendar->makeCalender('p');
 }

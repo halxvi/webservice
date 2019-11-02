@@ -1,24 +1,25 @@
 <?php
-//require_once("config.php");
+require_once("db.php");
 
-class DBContoller
+class Main
 {
   private $UserMessage = null;
   private $task = null;
   private $goal = null;
   private $days = null;
   private $day  = null;
-  private $dsn = null;
   private $pdo = null;
   private $row = null;
 
   function __construct()
   {
     session_start();
-    $dbENV = parse_url($_SERVER["CLEARDB_DATABASE_URL"]);
-    $dbENV['dbname'] = ltrim($dbENV['path'], '/');
-    $this->dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $dbENV['host'], $dbENV['dbname']);
-    $this->pdo = new PDO($this->dsn, $dbENV['user'], $dbENV['pass'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+    // $dbENV = parse_url($_SERVER["CLEARDB_DATABASE_URL"]);
+    // $dbENV['dbname'] = ltrim($dbENV['path'], '/');
+    // $this->dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $dbENV['host'], $dbENV['dbname']);
+    // $this->pdo = new PDO($this->dsn, $dbENV['user'], $dbENV['pass'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+    $db = new DB();
+    $this->pdo = $db->getPDO();
     $this->day  = (int) date("Ymd");
     $this->getTable();
     if (isset($this->row["Goal"])) {
@@ -129,7 +130,7 @@ class DBContoller
   }
 }
 
-$db = new DBContoller();
+$db = new Main();
 
 if ($db->getRow("TaskNo")) {
   filter_input(INPUT_POST, "endTask") ? $db->endTask() : false;
@@ -199,7 +200,7 @@ if (!isset($_SESSION["ID"])) {
     echo "<div><label class='font-weight-light tasktxt'>" . $db->hsc($db->getTask()) . "</label></div>";
   }
   if ($db->getDays()) {
-    echo "<div><label class='font-weight-light daystxt'>" . $db->hsc($db->getDays()) . "</label><br><div class='progress w-75'><div class='progress-bar' role='progressbar' style='width:" . $db->hsc($db->getProgress()) . "%' aria-valuenow='" . $db->hsc($db->getProgress()) . "' aria-valuemin='0' aria-valuemax='100'>" . $db->hsc($db->getProgress()) . "%</div></div></div>";
+    echo "<div><label class='font-weight-light daystxt'>" . $db->hsc($db->getDays()) . "</label><br><div class='progress w-50'><div class='progress-bar' role='progressbar' style='width:" . $db->hsc($db->getProgress()) . "%' aria-valuenow='" . $db->hsc($db->getProgress()) . "' aria-valuemin='0' aria-valuemax='100'>" . $db->hsc($db->getProgress()) . "%</div></div></div>";
   }
   ?>
 

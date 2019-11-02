@@ -1,17 +1,20 @@
 <?php
-//require_once("config.php");
+require_once("db.php");
 
-class LoginController
+class Login
 {
     private $UserMessage = null;
+    private $pdo = null;
 
     function Login()
     {
         $UserName = filter_input(INPUT_POST, "UserName");
-        $dbENV = parse_url($_SERVER["CLEARDB_DATABASE_URL"]);
-        $dbENV['dbname'] = ltrim($dbENV['path'], '/');
-        $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $dbENV['host'], $dbENV['dbname']);
-        $pdo = new PDO($dsn, $dbENV['user'], $dbENV['pass'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+        $db = new DB();
+        $pdo = $db->getPDO();
+        // $dbENV = parse_url($_SERVER["CLEARDB_DATABASE_URL"]);
+        // $dbENV['dbname'] = ltrim($dbENV['path'], '/');
+        // $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $dbENV['host'], $dbENV['dbname']);
+        // $pdo = new PDO($dsn, $dbENV['user'], $dbENV['pass'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
         try {
             $stmt = $pdo->prepare('SELECT * FROM Users WHERE UserName = ?');
             $stmt->execute(array($UserName));
@@ -48,7 +51,7 @@ class LoginController
     }
 }
 
-$Login = new LoginController();
+$Login = new Login();
 
 if (filter_input(INPUT_POST, "Login")) {
     $Login->Login();

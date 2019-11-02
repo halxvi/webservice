@@ -231,10 +231,10 @@ if (isset($_REQUEST['nextMonth'])) {
     </tr>
     <tr>
       <?php $cend = 0; ?>
-      <?php foreach ($main->hsc($calendar->getCalendar()) as $key => $value) : ?>
+      <?php foreach ($calendar->getCalendar() as $key => $value) : ?>
         <td>
           <?php $cend++;
-            echo $value['day'];
+            echo $main->hsc($value['day']);
             ?>
         </td>
         <?php if ($cend == 7) : ?>

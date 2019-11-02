@@ -61,8 +61,7 @@ if (filter_input(INPUT_POST, "goSignup")) {
 
 <head>
     <title>もくひょうくん</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <!-- <link href="css/color.scss" type="text/scss" rel="stylesheet"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>

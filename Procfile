@@ -1,1 +1,1 @@
-web: vendor/bin/heroku-php-nginx assets/html
+web: vendor/bin/heroku-php-nginx assets

@@ -27,7 +27,7 @@ class Main
     } else {
       $this->UserMessage = sprintf("ようこそ%sさん\n目標を作りましょう", $_SESSION["Name"]);
     }
-    if (isset($this->row["Task"])) {
+    if ($this->row["Task"] != '') {
       $this->task = sprintf("今日やること：%s", $this->row["Task"]);
     }
   }

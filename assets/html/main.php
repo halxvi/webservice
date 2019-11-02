@@ -159,8 +159,8 @@ if (isset($_REQUEST['nextMonth'])) {
   <title>もくひょうくん</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="../css/simple-sidebar.css" rel="stylesheet">
-  <link href="../css/calendar-style.css" rel="stylesheet">
+  <link href="assets/css/simple-sidebar.css" rel="stylesheet">
+  <link href="assets/css/calendar-style.css" rel="stylesheet">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>

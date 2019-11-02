@@ -1,5 +1,6 @@
 <?php
 require_once("db.php");
+require_once("calendar.php");
 
 class Main
 {
@@ -14,10 +15,6 @@ class Main
   function __construct()
   {
     session_start();
-    // $dbENV = parse_url($_SERVER["CLEARDB_DATABASE_URL"]);
-    // $dbENV['dbname'] = ltrim($dbENV['path'], '/');
-    // $this->dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $dbENV['host'], $dbENV['dbname']);
-    // $this->pdo = new PDO($this->dsn, $dbENV['user'], $dbENV['pass'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
     $db = new DB();
     $this->pdo = $db->getPDO();
     $this->day  = (int) date("Ymd");
@@ -130,19 +127,30 @@ class Main
   }
 }
 
-$db = new Main();
+$main = new Main();
 
-if ($db->getRow("TaskNo")) {
-  filter_input(INPUT_POST, "endTask") ? $db->endTask() : false;
+if ($main->getRow("TaskNo")) {
+  filter_input(INPUT_POST, "endTask") ? $main->endTask() : false;
 }
 
-if ($db->getRow("TaskCounter") != null && $db->getRow("Period") != null) {
-  $db->checkGoal();
+if ($main->getRow("TaskCounter") != null && $main->getRow("Period") != null) {
+  $main->checkGoal();
 }
 
 if (!isset($_SESSION["ID"])) {
   header("location:login.php");
 }
+
+$calendar = new Calendar();
+
+if (isset($_REQUEST['previousMonth'])) {
+  $calendar->makeCalender('p');
+}
+
+if (isset($_REQUEST['nextMonth'])) {
+  $calendar->makeCalender('n');
+}
+
 ?>
 
 <html>
@@ -159,8 +167,8 @@ if (!isset($_SESSION["ID"])) {
 <script src="js/main.js"></script>
 
 <body>
-  <?php if ($db->getUserMessage()) {
-    echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . $db->hsc($db->getUserMessage()) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
+  <?php if ($main->getUserMessage()) {
+    echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . $main->hsc($main->getUserMessage()) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
   }
   ?>
 
@@ -193,16 +201,50 @@ if (!isset($_SESSION["ID"])) {
   </div>
 
   <?php
-  if ($db->getGoal()) {
-    echo "<div><label class='font-weight-light goaltxt'>" . $db->hsc($db->getGoal()) . "</label></div>";
+  if ($main->getGoal()) {
+    echo "<div><label class='font-weight-light goaltxt'>" . $main->hsc($main->getGoal()) . "</label></div>";
   }
-  if ($db->getTask()) {
-    echo "<div><label class='font-weight-light tasktxt'>" . $db->hsc($db->getTask()) . "</label></div>";
+  if ($main->getTask()) {
+    echo "<div><label class='font-weight-light tasktxt'>" . $main->hsc($main->getTask()) . "</label></div>";
   }
-  if ($db->getDays()) {
-    echo "<div><label class='font-weight-light daystxt'>" . $db->hsc($db->getDays()) . "</label><br><div class='progress w-50'><div class='progress-bar' role='progressbar' style='width:" . $db->hsc($db->getProgress()) . "%' aria-valuenow='" . $db->hsc($db->getProgress()) . "' aria-valuemin='0' aria-valuemax='100'>" . $db->hsc($db->getProgress()) . "%</div></div></div>";
+  if ($main->getDays()) {
+    echo "<div><label class='font-weight-light daystxt'>" . $main->hsc($main->getDays()) . "</label><br><div class='progress w-50'><div class='progress-bar' role='progressbar' style='width:" . $main->hsc($main->getProgress()) . "%' aria-valuenow='" . $main->hsc($main->getProgress()) . "' aria-valuemin='0' aria-valuemax='100'>" . $main->hsc($main->getProgress()) . "%</div></div></div>";
   }
   ?>
+  <?php echo $main->hsc($calendar->getYear()) . '年' . $main->hsc($calendar->getMonth()) . '月' ?>
+  <form class="m-0" method="POST">
+    <input type="submit" name="previousMonth" class="btn btn-secondary" value="<">
+    <input type="submit" name="nextMonth" class="btn btn-secondary" value=">">
+  </form>
+  <br>
+
+  <table>
+    <tr>
+      <th>日</th>
+      <th>月</th>
+      <th>火</th>
+      <th>水</th>
+      <th>木</th>
+      <th>金</th>
+      <th>土</th>
+    </tr>
+    <tr>
+      <?php $cend = 0; ?>
+      <?php foreach ($main->hsc($calendar->getCalendar()) as $key => $value) : ?>
+        <td>
+          <?php $cend++;
+            echo $value['day'];
+            ?>
+        </td>
+        <?php if ($cend == 7) : ?>
+    </tr>
+    <tr>
+      <?php $cend = 0; ?>
+    <?php endif; ?>
+
+  <?php endforeach; ?>
+    </tr>
+  </table>
 
   <div class="modal" id="logoutModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">

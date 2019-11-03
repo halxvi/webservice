@@ -34,11 +34,29 @@ class Main
 
   function endTask()
   {
-    if ($this->row[Date] != $this->date) {
+    $stmt = $this->pdo->prepare("SELECT * FROM Counter WHERE TaskNo = ?");
+    $stmt->execute(array($this->row['TaskNo']));
+    $counter = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    for ($i = 0; $i < length($counter); $i++) {
+      if ($counter[$i] != $this->date) {
+        $flag = 1;
+      } else {
+        $flag = 0;
+      }
+    }
+    if ($flag == 1) {
       $this->commitTask();
     } else {
       $this->UserMessage = "今日の分は終わっています";
     }
+  }
+
+  private function commitTask()
+  {
+    $this->UserMessage = "今日もお疲れ様です！";
+    $this->setCounter();
+    $this->getTable();
+    $this->days = sprintf("%s日継続中です", $this->row["TaskCounter"]);
   }
 
   function checkGoal()
@@ -84,14 +102,6 @@ class Main
     // $stmt = $this->pdo->prepare("UPDATE Tasks SET LastAccessDay = ? WHERE EndFlag = 0");
     // $stmt->bindValue(1, $this->day, PDO::PARAM_INT);
     // $stmt->execute();
-  }
-
-  private function commitTask()
-  {
-    $this->UserMessage = "今日もお疲れ様です！";
-    $this->setCounter();
-    $this->getTable();
-    $this->days = sprintf("%s日継続中です", $this->row["TaskCounter"]);
   }
 
   function getUserMessage()

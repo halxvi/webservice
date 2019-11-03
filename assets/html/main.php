@@ -36,14 +36,13 @@ class Main
   {
     $stmt = $this->pdo->prepare("SELECT * FROM Counter WHERE TaskNo = ?");
     $stmt->execute(array($this->row['TaskNo']));
-    $counter = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    var_dump($counter);
-    // for ($i = 0; $i < count($counter); $i++) {
-    //   echo $counter[$i];
-    //   if ($counter[$i] = $this->date) {
-    //     $this->UserMessage = "今日の分は終わっています";
-    //     return;
-    //   }
+    $counter = $stmt->fetchAll(PDO::FETCH_ASSOC | PDO::FETCH_UNIQUE);
+    for ($i = 0; $i < count($counter); $i++) {
+      echo $counter[$i]['Date'];
+      if ($counter[$i]['Date'] = $this->date) {
+        $this->UserMessage = "今日の分は終わっています";
+        return;
+      }
     // }
     // // $this->commitTask();
     // $this->UserMessage = "今日もお疲れ様です！";

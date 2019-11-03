@@ -42,7 +42,7 @@ class Main
       }
     }
     $this->UserMessage = "今日もお疲れ様です！";
-    $this->setCounter();
+    //$this->setCounter();
     $this->getTable();
     $this->date = sprintf("%s日継続中です", count($counter));
   }

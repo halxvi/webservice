@@ -38,12 +38,13 @@ class Main
     $stmt->execute(array($this->row['TaskNo']));
     $counter = $stmt->fetchAll(PDO::FETCH_COLUMN);
     for ($i = 0; $i < count($counter); $i++) {
-      if ($counter[$i] != $this->date) {
-        echo  1;
-      } else {
-        echo  0;
+      echo $counter[$i];
+      if ($counter[$i] = $this->date) {
+        $this->UserMessage = "今日の分は終わっています";
+        return;
       }
     }
+    $this->commitTask();
     // }
     // if ($flag == 1) {
     //   $this->commitTask();

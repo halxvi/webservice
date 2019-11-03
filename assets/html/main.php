@@ -62,7 +62,7 @@ class Main
   private function getTable()
   {
     try {
-      $stmt = $this->pdo->prepare("SELECT * FROM Users,Tasks,Counter WHERE UserId = ? AND Users.UserId = Tasks.TaskUserId AND Counter.TaskNo = Tasks.TaskUserId AND Tasks.EndFlag = 0");
+      $stmt = $this->pdo->prepare("SELECT * FROM Users,Tasks,Counter WHERE Users.UserId = ? AND Users.UserId = Tasks.TaskUserId AND Counter.TaskNo = Tasks.TaskNo AND Tasks.EndFlag = 0");
       $stmt->execute(array($_SESSION["ID"]));
       $this->row = $stmt->fetch(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
@@ -72,9 +72,10 @@ class Main
 
   private function setCounter()
   {
-    $stmt = $this->pdo->prepare("INSERT INTO Counter(TaskNo,Date) value(:TaskNo,:Date)");
-    $stmt->bindValue(1, $this->row["TaskNo"], PDO::PARAM_INT);
-    $stmt->bindValue(2, date("Y-n-d"));
+    $stmt = $this->pdo->prepare("INSERT INTO Counter(UserId,TaskNo,Date) value(:UserId,:TaskNo,:Date)");
+    $stmt->bindValue(1, $_SESSION["ID"], PDO::PARAM_INT);
+    $stmt->bindValue(2, $this->row["TaskNo"], PDO::PARAM_INT);
+    $stmt->bindValue(3, date("Y-n-d"));
     $stmt->execute();
     // $AddCounter = $this->row["TaskCounter"] + 1;
     // $stmt = $this->pdo->prepare("UPDATE Tasks SET TaskCounter = ? WHERE EndFlag = 0");

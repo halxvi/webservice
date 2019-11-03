@@ -37,7 +37,7 @@ class Main
     $stmt = $this->pdo->prepare("SELECT * FROM Counter WHERE TaskNo = ?");
     $stmt->execute(array($this->row['TaskNo']));
     $counter = $stmt->fetchAll(PDO::FETCH_COLUMN);
-    echo $counter[0];
+    print_r($counter);
     // for ($i = 0; $i < count($counter); $i++) {
     //   echo $counter[$i];
     //   if ($counter[$i] = $this->date) {
@@ -45,7 +45,11 @@ class Main
     //     return;
     //   }
     // }
-    // $this->commitTask();
+    // // $this->commitTask();
+    // $this->UserMessage = "今日もお疲れ様です！";
+    // $this->setCounter();
+    // $this->getTable();
+    // $this->days = sprintf("%s日継続中です", $this->row["TaskCounter"]);
     // }
     // if ($flag == 1) {
     //   $this->commitTask();
@@ -54,13 +58,6 @@ class Main
     // }
   }
 
-  private function commitTask()
-  {
-    $this->UserMessage = "今日もお疲れ様です！";
-    $this->setCounter();
-    $this->getTable();
-    $this->days = sprintf("%s日継続中です", $this->row["TaskCounter"]);
-  }
 
   function checkGoal()
   {

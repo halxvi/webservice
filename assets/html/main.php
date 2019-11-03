@@ -37,18 +37,19 @@ class Main
     $stmt = $this->pdo->prepare("SELECT * FROM Counter WHERE TaskNo = ?");
     $stmt->execute(array($this->row['TaskNo']));
     $counter = $stmt->fetchAll(PDO::FETCH_COLUMN);
-    for ($i = 0; $i < length($counter); $i++) {
-      if ($counter[$i] != $this->date) {
-        $flag = 1;
-      } else {
-        $flag = 0;
-      }
-    }
-    if ($flag == 1) {
-      $this->commitTask();
-    } else {
-      $this->UserMessage = "今日の分は終わっています";
-    }
+    echo $counter;
+    // for ($i = 0; $i < length($counter); $i++) {
+    //   if ($counter[$i] != $this->date) {
+    //     echo  1;
+    //   } else {
+    //     echo  0;
+    //   }
+    // }
+    // if ($flag == 1) {
+    //   $this->commitTask();
+    // } else {
+    //   $this->UserMessage = "今日の分は終わっています";
+    // }
   }
 
   private function commitTask()

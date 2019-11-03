@@ -36,7 +36,7 @@ class Main
   {
     $stmt = $this->pdo->prepare("SELECT * FROM Counter WHERE TaskNo = ?");
     $stmt->execute(array($this->row['TaskNo']));
-    $counter = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    $counter = $stmt->fetchAll(PDO::FETCH_ASSOC);
     print_r($counter);
     // for ($i = 0; $i < count($counter); $i++) {
     //   echo $counter[$i];

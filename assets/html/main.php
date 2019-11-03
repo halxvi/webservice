@@ -62,7 +62,7 @@ class Main
   private function getTable()
   {
     try {
-      $stmt = $this->pdo->prepare("SELECT * FROM Users,Tasks,Counter WHERE Users.UserId = ? AND Users.UserId = Tasks.TaskUserId AND Counter.TaskNo = Tasks.TaskNo AND Tasks.EndFlag = 0");
+      $stmt = $this->pdo->prepare("SELECT * FROM Users,Tasks WHERE Users.UserId = ? AND Users.UserId = Tasks.TaskUserId AND Tasks.EndFlag = 0");
       $stmt->execute(array($_SESSION["ID"]));
       $this->row = $stmt->fetch(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {

@@ -43,6 +43,7 @@ class Main
       } else {
         echo  0;
       }
+    }
     // }
     // if ($flag == 1) {
     //   $this->commitTask();

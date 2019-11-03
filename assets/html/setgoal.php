@@ -31,7 +31,7 @@ class SetGoal
         $stmt->bindValue(':way', filter_input(INPUT_POST, "way"), PDO::PARAM_STR);
         $stmt->bindValue(':term', filter_input(INPUT_POST, "term"), PDO::PARAM_INT);
         $stmt->bindValue(':start', date("Ynd"));
-        $stmt->bindValue(':end', date('Y-n-d', mktime(0, 0, 0, date(n), date(d) + rand(filter_input(INPUT_POST, "term") + 3, filter_input(INPUT_POST, "term") + 10), date(Y))));
+        $stmt->bindValue(':end', date('Y-n-d', mktime(0, 0, 0, date(n), date(d) + rand(filter_input(INPUT_POST, "term") + 3, filter_input(INPUT_POST, "term") + 9), date(Y))));
         $stmt->execute();
         // $stmt = $this->pdo->prepare("SELECT TaskNo FROM Tasks WHERE TaskUserId = ? AND EndFlag = 0");
         // $stmt->bindValue(':id', $_SESSION["ID"], PDO::PARAM_STR);

@@ -43,7 +43,7 @@ class Main
         $this->UserMessage = "今日の分は終わっています";
         return;
       }
-    // }
+    }
     // // $this->commitTask();
     // $this->UserMessage = "今日もお疲れ様です！";
     // $this->setCounter();

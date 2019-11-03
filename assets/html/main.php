@@ -8,7 +8,6 @@ class Main
   private $task = null;
   private $goal = null;
   private $days = null;
-  private $date  = null;
   private $pdo = null;
   private $row = null;
 
@@ -17,7 +16,6 @@ class Main
     session_start();
     $db = new DB();
     $this->pdo = $db->getPDO();
-    $this->date  = date("Y-n-d");
     $this->getTable();
     if (isset($this->row["Goal"])) {
       $this->goal = sprintf("現在の目標は%sです", $this->row["Goal"]);
@@ -38,13 +36,13 @@ class Main
     $stmt->execute(array($this->row['TaskNo']));
     $counter = $stmt->fetchAll(PDO::FETCH_ASSOC | PDO::FETCH_UNIQUE);
     for ($i = 0; $i < count($counter); $i++) {
-      if ($counter[$i]['Date'] == $this->date) {
+      if ($counter[$i]['Date'] == date("Y-n-d")) {
         $this->UserMessage = "今日の分は終わっています";
         return;
       }
     }
     $this->UserMessage = "今日もお疲れ様です！";
-    $this->setCounter();
+    //  $this->setCounter();
     $this->getTable();
     $this->date = sprintf("%s日継続中です", count($counter));
   }
@@ -86,13 +84,6 @@ class Main
     $stmt->bindValue(2, $this->row["TaskNo"], PDO::PARAM_INT);
     $stmt->bindValue(3, date("Y-n-d"));
     $stmt->execute();
-    // $AddCounter = $this->row["TaskCounter"] + 1;
-    // $stmt = $this->pdo->prepare("UPDATE Tasks SET TaskCounter = ? WHERE EndFlag = 0");
-    // $stmt->bindValue(1, $AddCounter, PDO::PARAM_INT);
-    // $stmt->execute();
-    // $stmt = $this->pdo->prepare("UPDATE Tasks SET LastAccessDay = ? WHERE EndFlag = 0");
-    // $stmt->bindValue(1, $this->day, PDO::PARAM_INT);
-    // $stmt->execute();
   }
 
   function getUserMessage()

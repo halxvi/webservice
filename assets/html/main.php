@@ -36,13 +36,13 @@ class Main
     $stmt->execute(array($this->row['TaskNo']));
     $counter = $stmt->fetchAll(PDO::FETCH_ASSOC | PDO::FETCH_UNIQUE);
     for ($i = 0; $i < count($counter); $i++) {
-      if ($counter[$i]['Date'] == date("Y-n-d")) {
+      if ($counter[$i]['Date'] == date("Y-m-d")) {
         $this->UserMessage = "今日の分は終わっています";
         return;
       }
     }
     $this->UserMessage = "今日もお疲れ様です！";
-    //  $this->setCounter();
+    $this->setCounter();
     $this->getTable();
     $this->date = sprintf("%s日継続中です", count($counter));
   }
@@ -82,7 +82,7 @@ class Main
     $stmt = $this->pdo->prepare("INSERT INTO Counter(UserId,TaskNo,Date) value(:UserId,:TaskNo,:Date)");
     $stmt->bindValue(1, $_SESSION["ID"], PDO::PARAM_INT);
     $stmt->bindValue(2, $this->row["TaskNo"], PDO::PARAM_INT);
-    $stmt->bindValue(3, date("Y-n-d"));
+    $stmt->bindValue(3, date("Y-m-d"));
     $stmt->execute();
   }
 

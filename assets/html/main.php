@@ -43,16 +43,10 @@ class Main
         return;
       }
     }
-    // $this->UserMessage = "今日もお疲れ様です！";
-    // $this->setCounter();
-    // $this->getTable();
-    // $this->days = sprintf("%s日継続中です", $this->row["TaskCounter"]);
-    // }
-    // if ($flag == 1) {
-    //   $this->commitTask();
-    // } else {
-    //   $this->UserMessage = "今日の分は終わっています";
-    // }
+    $this->UserMessage = "今日もお疲れ様です！";
+    $this->setCounter();
+    $this->getTable();
+    $this->date = sprintf("%s日継続中です", count($counter));
   }
 
 
@@ -116,9 +110,9 @@ class Main
     return $this->task;
   }
 
-  function getDays()
+  function getDate()
   {
-    return $this->days;
+    return $this->date;
   }
 
   function getRow($str)
@@ -222,8 +216,8 @@ if (isset($_REQUEST['nextMonth'])) {
   if ($main->getTask()) {
     echo "<div><label class='font-weight-light tasktxt'>" . $main->hsc($main->getTask()) . "</label></div>";
   }
-  if ($main->getDays()) {
-    echo "<div><label class='font-weight-light daystxt'>" . $main->hsc($main->getDays()) . "</label><br><div class='progress w-50'><div class='progress-bar' role='progressbar' style='width:" . $main->hsc($main->getProgress()) . "%' aria-valuenow='" . $main->hsc($main->getProgress()) . "' aria-valuemin='0' aria-valuemax='100'>" . $main->hsc($main->getProgress()) . "%</div></div></div>";
+  if ($main->getDate()) {
+    echo "<div><label class='font-weight-light daystxt'>" . $main->hsc($main->getDate()) . "</label><br><div class='progress w-50'><div class='progress-bar' role='progressbar' style='width:" . $main->hsc($main->getProgress()) . "%' aria-valuenow='" . $main->hsc($main->getProgress()) . "' aria-valuemin='0' aria-valuemax='100'>" . $main->hsc($main->getProgress()) . "%</div></div></div>";
   }
   ?>
   <?php echo $main->hsc($calendar->getYear()) . '年' . $main->hsc($calendar->getMonth()) . '月' ?>

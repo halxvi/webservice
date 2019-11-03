@@ -37,13 +37,12 @@ class Main
     $stmt = $this->pdo->prepare("SELECT * FROM Counter WHERE TaskNo = ?");
     $stmt->execute(array($this->row['TaskNo']));
     $counter = $stmt->fetchAll(PDO::FETCH_COLUMN);
-    echo $counter;
-    // for ($i = 0; $i < length($counter); $i++) {
-    //   if ($counter[$i] != $this->date) {
-    //     echo  1;
-    //   } else {
-    //     echo  0;
-    //   }
+    for ($i = 0; $i < length($counter); $i++) {
+      if ($counter[$i] != $this->date) {
+        echo  1;
+      } else {
+        echo  0;
+      }
     // }
     // if ($flag == 1) {
     //   $this->commitTask();

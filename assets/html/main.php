@@ -8,7 +8,7 @@ class Main
   private $task = null;
   private $goal = null;
   private $days = null;
-  private $day  = null;
+  private $date  = null;
   private $pdo = null;
   private $row = null;
 
@@ -17,7 +17,7 @@ class Main
     session_start();
     $db = new DB();
     $this->pdo = $db->getPDO();
-    $this->day  = (int) date("Ymd");
+    $this->date  = date("Y-n-d");
     $this->getTable();
     if (isset($this->row["Goal"])) {
       $this->goal = sprintf("現在の目標は%sです", $this->row["Goal"]);
@@ -34,7 +34,7 @@ class Main
 
   function endTask()
   {
-    if ($this->row["LastAccessDay"] != $this->day) {
+    if ($this->row[Date] != $this->date) {
       $this->commitTask();
     } else {
       $this->UserMessage = "今日の分は終わっています";
@@ -62,7 +62,7 @@ class Main
   private function getTable()
   {
     try {
-      $stmt = $this->pdo->prepare("SELECT * FROM Users,Tasks WHERE UserId = ? AND Users.UserId = Tasks.TaskUserId AND Tasks.EndFlag = 0");
+      $stmt = $this->pdo->prepare("SELECT * FROM Users,Tasks,Counter WHERE UserId = ? AND Users.UserId = Tasks.TaskUserId AND Counter.TaskNo = Tasks.TaskUserId AND Tasks.EndFlag = 0");
       $stmt->execute(array($_SESSION["ID"]));
       $this->row = $stmt->fetch(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
@@ -72,13 +72,17 @@ class Main
 
   private function setCounter()
   {
-    $AddCounter = $this->row["TaskCounter"] + 1;
-    $stmt = $this->pdo->prepare("UPDATE Tasks SET TaskCounter = ? WHERE EndFlag = 0");
-    $stmt->bindValue(1, $AddCounter, PDO::PARAM_INT);
+    $stmt = $this->pdo->prepare("INSERT INTO Counter(TaskNo,Date) value(:TaskNo,:Date)");
+    $stmt->bindValue(1, $this->row["TaskNo"], PDO::PARAM_INT);
+    $stmt->bindValue(2, date("Y-n-d"));
     $stmt->execute();
-    $stmt = $this->pdo->prepare("UPDATE Tasks SET LastAccessDay = ? WHERE EndFlag = 0");
-    $stmt->bindValue(1, $this->day, PDO::PARAM_INT);
-    $stmt->execute();
+    // $AddCounter = $this->row["TaskCounter"] + 1;
+    // $stmt = $this->pdo->prepare("UPDATE Tasks SET TaskCounter = ? WHERE EndFlag = 0");
+    // $stmt->bindValue(1, $AddCounter, PDO::PARAM_INT);
+    // $stmt->execute();
+    // $stmt = $this->pdo->prepare("UPDATE Tasks SET LastAccessDay = ? WHERE EndFlag = 0");
+    // $stmt->bindValue(1, $this->day, PDO::PARAM_INT);
+    // $stmt->execute();
   }
 
   private function commitTask()

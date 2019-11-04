@@ -153,7 +153,6 @@ if (isset($_REQUEST['previousMonth'])) {
 if (isset($_REQUEST['nextMonth'])) {
   $calendar->makeCalender('n');
 }
-
 ?>
 
 <html>
@@ -238,8 +237,11 @@ if (isset($_REQUEST['nextMonth'])) {
     <tr>
       <?php $cend = 0; ?>
       <?php foreach ($calendar->getCalendar() as $key => $value) : ?>
-        <td>
-          <?php $cend++;
+        <td <?php if ($main->hsc($value['check'])) {
+                echo 'class="calendar-color"';
+              } ?>>
+          <?php
+            $cend++;
             echo $main->hsc($value['day']);
             ?>
         </td>
@@ -253,7 +255,7 @@ if (isset($_REQUEST['nextMonth'])) {
     </tr>
   </table>
 
-  <div class="modal" id="logoutModal" tabindex="-1" role="dialog">
+  <div class=" modal" id="logoutModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">

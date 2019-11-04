@@ -16,3 +16,8 @@
         text-align: center;
         padding: 5px;
     }
+
+   .calendar-color{
+    background-color: orangered;
+    color: white;
+   }

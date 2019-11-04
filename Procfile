@@ -1,2 +1,2 @@
 web: vendor/bin/heroku-php-nginx assets
-web: vendor/bin/heroku-php-nginx -i user.ini
+web: vendor/bin/heroku-php-nginx -i assets/conf/php.ini

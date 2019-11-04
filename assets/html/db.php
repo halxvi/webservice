@@ -1,5 +1,4 @@
 <?php
-include_once('dev.php');
 ini_set('error_reporting', E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_ERROR | E_CORE_ERROR);
 
 class DB
@@ -10,8 +9,8 @@ class DB
 
     function __construct()
     {
-        global $check, $dbENV;
-        if ($check) {
+        global $dbENV;
+        if (include_once('dev.php');) {
             $this->dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $dbENV['host'], $dbENV['dbname']);
             $this->pdo = new PDO($this->dsn, $dbENV['user'], $dbENV['pass'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
         } else {

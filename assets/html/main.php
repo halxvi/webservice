@@ -106,7 +106,7 @@ class Main
     if ($this->row["Goal"]) {
       return sprintf("現在の目標は%sです", $this->row["Goal"]);
     } else {
-      $this->UserMessage = sprintf("ようこそ%sさん\n目標を作りましょう", $_SESSION["Name"]);
+      return sprintf("ようこそ%sさん\n目標を作りましょう", $_SESSION["Name"]);
     }
   }
 

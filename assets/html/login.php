@@ -55,8 +55,6 @@ if (filter_input(INPUT_POST, "Login")) {
 if (filter_input(INPUT_POST, "goSignup")) {
     $Login->signUp();
 }
-
-echo date_default_timezone_get();
 ?>
 
 <html>

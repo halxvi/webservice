@@ -31,15 +31,8 @@ class SetGoal
         $stmt->bindValue(':way', filter_input(INPUT_POST, "way"), PDO::PARAM_STR);
         $stmt->bindValue(':term', filter_input(INPUT_POST, "term"), PDO::PARAM_INT);
         $stmt->bindValue(':start', date("Ymd"));
-        $stmt->bindValue(':end', date('Ymd', mktime(0, 0, 0, date(m), date(d) + rand(filter_input(INPUT_POST, "term") + 3, filter_input(INPUT_POST, "term") + 9), date(Y))));
+        $stmt->bindValue(':end', date('Ymd', mktime(0, 0, 0, date('m'), date('d') + rand(filter_input(INPUT_POST, "term") + 3, filter_input(INPUT_POST, "term") + 9), date('Y'))));
         $stmt->execute();
-        // $stmt = $this->pdo->prepare("SELECT TaskNo FROM Tasks WHERE TaskUserId = ? AND EndFlag = 0");
-        // $stmt->bindValue(':id', $_SESSION["ID"], PDO::PARAM_STR);
-        // $stmt->execute();
-        // $taskNo = $stmt->fetch(PDO::FETCH_NUM);
-        // $date = date("Ymd");
-        // $stmt = $this->pdo->prepare("INSERT INTO Counter(UserId,TaskNo,Date) value(:id,)");
-        // $stmt->bindValue(':id', $_SESSION["ID"], PDO::PARAM_STR);
         $this->UserMessage = "目標を登録しました！";
       } else {
         $this->UserMessage = "既に目標があります 現在の目標を削除してください";
@@ -105,10 +98,6 @@ if (!$_SESSION["ID"]) {
 <script src="js/main.js"></script>
 
 <body>
-  <?php if ($setgoal->getUserMessage()) {
-    echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . $setgoal->hsc($setgoal->getUserMessage()) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
-  } ?>
-
   <div class="d-flex" id="wrapper">
     <div id="page-content-wrapper" class="w-100">
       <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
@@ -130,6 +119,10 @@ if (!$_SESSION["ID"]) {
           </ul>
         </div>
       </nav>
+
+      <?php if ($setgoal->getUserMessage()) {
+        echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . $setgoal->hsc($setgoal->getUserMessage()) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
+      } ?>
 
       <div class="container-fluid">
         <form method="POST">

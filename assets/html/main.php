@@ -5,9 +5,6 @@ require_once("calendar.php");
 class Main
 {
   private $UserMessage = null;
-  private $task = null;
-  private $goal = null;
-  private $days = null;
   private $pdo = null;
   private $row = null;
 
@@ -17,26 +14,15 @@ class Main
     $db = new DB();
     $this->pdo = $db->getPDO();
     $this->getTable();
-    if (isset($this->row["Goal"])) {
-      $this->goal = sprintf("現在の目標は%sです", $this->row["Goal"]);
-      if ($this->row["TaskCounter"] != 0) {
-        $this->days = sprintf("%s日継続中です", $this->row["TaskCounter"]);
-      }
-    } else {
-      $this->UserMessage = sprintf("ようこそ%sさん\n目標を作りましょう", $_SESSION["Name"]);
-    }
-    if ($this->row["Task"] != '') {
-      $this->task = sprintf("今日やること：%s", $this->row["Task"]);
-    }
   }
 
   function endTask()
   {
-    $stmt = $this->pdo->prepare("SELECT * FROM Counter WHERE TaskNo = ?");
+    $stmt = $this->pdo->prepare("SELECT Date FROM Counter WHERE TaskNo = ?");
     $stmt->execute(array($this->row['TaskNo']));
-    $counter = $stmt->fetchAll(PDO::FETCH_ASSOC | PDO::FETCH_UNIQUE);
+    $counter = $stmt->fetchAll(PDO::FETCH_COLUMN);
     for ($i = 0; $i < count($counter) + 1; $i++) {
-      if ($counter[$i]['Date'] == date("Y-m-d")) {
+      if ($counter[$i] == date("Y-m-d")) {
         $this->UserMessage = "今日の分は終わっています";
         return;
       }
@@ -69,7 +55,7 @@ class Main
   private function getTable()
   {
     try {
-      $stmt = $this->pdo->prepare("SELECT * FROM Users,Tasks WHERE Users.UserId = ? AND Users.UserId = Tasks.TaskUserId AND Tasks.EndFlag = 0");
+      $stmt = $this->pdo->prepare("SELECT * FROM Users,Tasks WHERE Users.UserId = ? AND Users.UserId = Tasks.TaskUserId  AND Tasks.EndFlag = 0");
       $stmt->execute(array($_SESSION["ID"]));
       $this->row = $stmt->fetch(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
@@ -79,11 +65,35 @@ class Main
 
   private function setCounter()
   {
-    $stmt = $this->pdo->prepare("INSERT INTO Counter(UserId,TaskNo,Date) value(:UserId,:TaskNo,:Date)");
-    $stmt->bindValue(':UserId', $_SESSION["ID"], PDO::PARAM_INT);
+    $stmt = $this->pdo->prepare("INSERT INTO Counter(TaskNo,Date) value(:TaskNo,:Date)");
     $stmt->bindValue(':TaskNo', $this->row["TaskNo"], PDO::PARAM_INT);
     $stmt->bindValue(':Date', date("Y-m-d"));
     $stmt->execute();
+  }
+
+  function getPeriod()
+  {
+    $this->getTable();
+    $stmt = $this->pdo->prepare("SELECT count(*) from Counter WHERE TaskNo = :Id");
+    $stmt->bindValue(':Id', $this->row["TaskNo"], PDO::PARAM_INT);
+    $stmt->execute();
+    $num = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($num['count(*)'] != 0) {
+      return sprintf("%s日継続中です", $num['count(*)']);
+    }
+  }
+
+  function getProgress()
+  {
+    $this->getTable();
+    $stmt = $this->pdo->prepare("SELECT count(*) from Counter WHERE TaskNo = :Id");
+    $stmt->bindValue(':Id', $this->row["TaskNo"], PDO::PARAM_INT);
+    $stmt->execute();
+    $num = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($num['count(*)'] != 0) {
+      $per =  $num['count(*)']  / $this->row["Period"] * 100;
+      return ceil($per);
+    }
   }
 
   function getUserMessage()
@@ -93,29 +103,23 @@ class Main
 
   function getGoal()
   {
-    return $this->goal;
+    if ($this->row["Goal"]) {
+      return sprintf("現在の目標は%sです", $this->row["Goal"]);
+    } else {
+      $this->UserMessage = sprintf("ようこそ%sさん\n目標を作りましょう", $_SESSION["Name"]);
+    }
   }
 
   function getTask()
   {
-    return $this->task;
-  }
-
-  function getDate()
-  {
-    return $this->date;
+    if ($this->row["Task"]) {
+      return sprintf("今日やること：%s", $this->row["Task"]);
+    }
   }
 
   function getRow($str)
   {
     return $this->row[$str];
-  }
-
-  function getProgress()
-  {
-    $this->getTable();
-    $per =  $this->row["TaskCounter"] / $this->row["Period"] * 100;
-    return ceil($per);
   }
 
   function hsc($str)
@@ -167,10 +171,7 @@ if (isset($_REQUEST['nextMonth'])) {
 <script src="../js/main.js"></script>
 
 <body>
-  <?php if ($main->getUserMessage()) {
-    echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . $main->hsc($main->getUserMessage()) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
-  }
-  ?>
+
 
   <div class="d-flex" id="wrapper">
     <div id="page-content-wrapper" class="w-100">
@@ -200,6 +201,11 @@ if (isset($_REQUEST['nextMonth'])) {
     </div>
   </div>
 
+  <?php if ($main->getUserMessage()) {
+    echo "<div class='alert alert-primary alert-dismissible fade show' role='alert'>" . $main->hsc($main->getUserMessage()) . "<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
+  }
+  ?>
+
   <?php
   if ($main->getGoal()) {
     echo "<div><label class='font-weight-light goaltxt'>" . $main->hsc($main->getGoal()) . "</label></div>";
@@ -207,10 +213,11 @@ if (isset($_REQUEST['nextMonth'])) {
   if ($main->getTask()) {
     echo "<div><label class='font-weight-light tasktxt'>" . $main->hsc($main->getTask()) . "</label></div>";
   }
-  if ($main->getDate()) {
-    echo "<div><label class='font-weight-light daystxt'>" . $main->hsc($main->getDate()) . "</label><br><div class='progress w-50'><div class='progress-bar' role='progressbar' style='width:" . $main->hsc($main->getProgress()) . "%' aria-valuenow='" . $main->hsc($main->getProgress()) . "' aria-valuemin='0' aria-valuemax='100'>" . $main->hsc($main->getProgress()) . "%</div></div></div>";
+  if ($main->getPeriod()) {
+    echo "<div><label class='font-weight-light daystxt'>" . $main->hsc($main->getPeriod()) . "</label><br><div class='progress w-50'><div class='progress-bar' role='progressbar' style='width:" . $main->hsc($main->getProgress()) . "%' aria-valuenow='" . $main->hsc($main->getProgress()) . "' aria-valuemin='0' aria-valuemax='100'>" . $main->hsc($main->getProgress()) . "%</div></div></div>";
   }
   ?>
+
   <?php echo $main->hsc($calendar->getYear()) . '年' . $main->hsc($calendar->getMonth()) . '月' ?>
   <form class="m-0" method="POST">
     <input type="submit" name="previousMonth" class="btn btn-secondary" value="<">

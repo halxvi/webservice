@@ -80,13 +80,10 @@ class Main
   private function setCounter()
   {
     $stmt = $this->pdo->prepare("INSERT INTO Counter(UserId,TaskNo,Date) value(:UserId,:TaskNo,:Date)");
-    echo $_SESSION["ID"];
-    echo $this->row["TaskNo"];
-    echo  date("Y-m-d");
-    // $stmt->bindValue(1, $_SESSION["ID"], PDO::PARAM_INT);
-    // $stmt->bindValue(2, $this->row["TaskNo"], PDO::PARAM_INT);
-    // $stmt->bindValue(3, date("Y-m-d"));
-    // $stmt->execute();
+    $stmt->bindValue(':UserId', $_SESSION["ID"], PDO::PARAM_INT);
+    $stmt->bindValue(':TaskNo', $this->row["TaskNo"], PDO::PARAM_INT);
+    $stmt->bindValue(':Date', date("Y-m-d"));
+    $stmt->execute();
   }
 
   function getUserMessage()

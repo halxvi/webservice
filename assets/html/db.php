@@ -1,6 +1,6 @@
 <?php
 include_once('dev.php');
-ini_set('error_reporting', E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED & ~E_NOTICE);
+ini_set('error_reporting', E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_ERROR | E_CORE_ERROR);
 
 class DB
 {

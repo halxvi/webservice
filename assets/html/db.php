@@ -1,6 +1,6 @@
 <?php
 include_once('dev.php');
-ini_set('error_reporting', 1);
+ini_set('error_reporting', 0);
 
 class DB
 {

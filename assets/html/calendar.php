@@ -81,7 +81,7 @@ class Calendar
         }
     }
 
-    function checkDate($year, $month, $day)
+    private function checkDate($year, $month, $day)
     {
         $stmt =  $this->pdo->prepare("SELECT Date FROM Counter WHERE TaskNo = ?");
         $stmt->execute(array($this->main->getRow('TaskNo')));

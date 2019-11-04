@@ -14,6 +14,7 @@ class Main
     $db = new DB();
     $this->pdo = $db->getPDO();
     $this->getTable();
+    $this->checkGoal();
   }
 
   function endTask()
@@ -34,11 +35,14 @@ class Main
   }
 
 
-  function checkGoal()
+  private function checkGoal()
   {
-    if ($this->getRow("TaskCounter") === $this->getRow("Period")) {
+    $this->getTable();
+    if ($this->getCount() == $this->getRow("Period")) {
+      $this->UserMessage = "おめでとうございます！   目標を達成しました！";
       $this->deleteGoal();
-      $this->UserMessage = "おめでとうございます！目標を達成しました！";
+    } elseif ($this->getRow('EndDate') && $this->getRow('EndDate')  <= date("Y-m-d")) {
+      $this->UserMessage = "目標設定から時間が経っています    新しく目標を設定してみてはいかがですか?";
     }
   }
 
@@ -73,27 +77,27 @@ class Main
 
   function getPeriod()
   {
-    $this->getTable();
-    $stmt = $this->pdo->prepare("SELECT count(*) from Counter WHERE TaskNo = :Id");
-    $stmt->bindValue(':Id', $this->row["TaskNo"], PDO::PARAM_INT);
-    $stmt->execute();
-    $num = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($num['count(*)'] != 0) {
-      return sprintf("%s日継続中です", $num['count(*)']);
+    if ($this->getCount() != 0) {
+      return sprintf("%s日継続中です", $this->getCount());
     }
   }
 
   function getProgress()
+  {
+    if ($this->getCount() != 0) {
+      $per = $this->getCount()  / $this->row["Period"] * 100;
+      return ceil($per);
+    }
+  }
+
+  private function getCount()
   {
     $this->getTable();
     $stmt = $this->pdo->prepare("SELECT count(*) from Counter WHERE TaskNo = :Id");
     $stmt->bindValue(':Id', $this->row["TaskNo"], PDO::PARAM_INT);
     $stmt->execute();
     $num = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($num['count(*)'] != 0) {
-      $per =  $num['count(*)']  / $this->row["Period"] * 100;
-      return ceil($per);
-    }
+    return $num['count(*)'];
   }
 
   function getUserMessage()
@@ -134,9 +138,9 @@ if ($main->getRow("TaskNo")) {
   filter_input(INPUT_POST, "endTask") ? $main->endTask() : false;
 }
 
-if ($main->getRow("TaskCounter") != null && $main->getRow("Period") != null) {
-  $main->checkGoal();
-}
+// if ($main->getRow("TaskCounter") != null && $main->getRow("Period") != null) {
+//   $main->checkGoal();
+// }
 
 if (!isset($_SESSION["ID"])) {
   header("location:login.php");

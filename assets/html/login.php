@@ -5,7 +5,7 @@ class Login
 {
     private $UserMessage = null;
 
-    function login()
+    function loginCheck()
     {
         $UserName = filter_input(INPUT_POST, "UserName");
         $db = new DB();
@@ -29,7 +29,7 @@ class Login
         }
     }
 
-    function signup()
+    function signUp()
     {
         header("Location: signup.php");
         exit();
@@ -49,11 +49,11 @@ class Login
 $Login = new Login();
 
 if (filter_input(INPUT_POST, "Login")) {
-    $Login->login();
+    $Login->loginCheck();
 }
 
 if (filter_input(INPUT_POST, "goSignup")) {
-    $Login->signup();
+    $Login->signUp();
 }
 ?>
 

@@ -10,7 +10,7 @@ class DB
     function __construct()
     {
         global $dbENV;
-        if (include_once('dev.php');) {
+        if (include_once('dev.php')) {
             $this->dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $dbENV['host'], $dbENV['dbname']);
             $this->pdo = new PDO($this->dsn, $dbENV['user'], $dbENV['pass'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
         } else {

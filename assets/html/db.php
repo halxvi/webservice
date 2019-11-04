@@ -1,5 +1,5 @@
 <?php
-require_once('dev.php');
+include_once('dev.php');
 
 class DB
 {

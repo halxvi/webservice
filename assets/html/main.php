@@ -35,7 +35,7 @@ class Main
     $stmt = $this->pdo->prepare("SELECT * FROM Counter WHERE TaskNo = ?");
     $stmt->execute(array($this->row['TaskNo']));
     $counter = $stmt->fetchAll(PDO::FETCH_ASSOC | PDO::FETCH_UNIQUE);
-    for ($i = 0; $i < count($counter); $i++) {
+    for ($i = 0; $i < count($counter) + 1; $i++) {
       if ($counter[$i]['Date'] == date("Y-m-d")) {
         $this->UserMessage = "今日の分は終わっています";
         return;

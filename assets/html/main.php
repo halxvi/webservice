@@ -42,7 +42,7 @@ class Main
       }
     }
     $this->UserMessage = "今日もお疲れ様です！";
-    //$this->setCounter();
+    $this->setCounter();
     $this->getTable();
     $this->date = sprintf("%s日継続中です", count($counter));
   }
@@ -80,10 +80,13 @@ class Main
   private function setCounter()
   {
     $stmt = $this->pdo->prepare("INSERT INTO Counter(UserId,TaskNo,Date) value(:UserId,:TaskNo,:Date)");
-    $stmt->bindValue(1, $_SESSION["ID"], PDO::PARAM_INT);
-    $stmt->bindValue(2, $this->row["TaskNo"], PDO::PARAM_INT);
-    $stmt->bindValue(3, date("Y-m-d"));
-    $stmt->execute();
+    echo $_SESSION["ID"];
+    echo $this->row["TaskNo"];
+    echo  date("Y-m-d");
+    // $stmt->bindValue(1, $_SESSION["ID"], PDO::PARAM_INT);
+    // $stmt->bindValue(2, $this->row["TaskNo"], PDO::PARAM_INT);
+    // $stmt->bindValue(3, date("Y-m-d"));
+    // $stmt->execute();
   }
 
   function getUserMessage()

@@ -1,9 +1,10 @@
 <?php
-//require_once("config.php");
+require_once("db.php");
 
 class SignupController
 {
     private $UserMessage = null;
+    private $pdo = null;
 
     private function numalphabetchecker($str)
     {
@@ -23,13 +24,11 @@ class SignupController
         $Password = filter_input(INPUT_POST, 'Password');
         $this->numalphabetchecker($UserName) && $this->strlengthchecker($UserName, 4, 10) ? $UserName = $UserName : $UserName = false;
         $this->numalphabetchecker($Password) && $this->strlengthchecker($Password, 8, 16) ? $Password = password_hash($Password, PASSWORD_DEFAULT) : $Password = false;
-        $dbENV = parse_url($_SERVER["CLEARDB_DATABASE_URL"]);
-        $dbENV['dbname'] = ltrim($dbENV['path'], '/');
-        $dsn = sprintf('mysql:host=%s; dbname=%s; charset=utf8', $dbENV['host'], $dbENV['dbname']);
-        $pdo = new PDO($dsn, $dbENV['user'], $dbENV['pass'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+        $db = new DB();
+        $this->pdo = $db->getPDO();
         if ($UserName && $Password) {
             try {
-                $stmt = $pdo->prepare('INSERT INTO Users(UserName,UserPassword) VALUE(?,?)');
+                $stmt = $this->pdo->prepare('INSERT INTO Users(UserName,UserPassword) VALUE(?,?)');
                 $stmt->bindValue(1, $UserName, PDO::PARAM_STR);
                 $stmt->bindValue(2, $Password, PDO::PARAM_STR);
                 $stmt->execute();
